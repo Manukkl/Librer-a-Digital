@@ -1,0 +1,2833 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librería Digital & Diario de Lecturas Pro v11.0 Ultimate</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#111827', 950: '#070b13' },
+                        sepia: { 100: '#fbf0d9', 200: '#f3e3c3', 800: '#5c4b37', 900: '#3e2e1e' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & Chart.js -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .filter-tab.active { background-color: #f59e0b; color: #0f172a; border-color: #f59e0b; font-weight: 700; }
+        .view-btn.active { background-color: #1e293b; color: #fbbf24; }
+        .glow-card { transition: all 0.25s ease-in-out; }
+        .glow-card:hover { box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.5); }
+        
+        /* Modos de Color */
+        body.theme-dark { background-color: #070b13; color: #f1f5f9; }
+        body.theme-dark .card-bg { background-color: rgba(15, 23, 42, 0.9); border-color: #1e293b; }
+        body.theme-sepia { background-color: #f4ecd8; color: #3b2d1d; }
+        body.theme-sepia .card-bg { background-color: #eadeca; border-color: #d4c3a3; }
+        body.theme-light { background-color: #f8fafc; color: #0f172a; }
+        body.theme-light .card-bg { background-color: #ffffff; border-color: #e2e8f0; }
+    </style>
+</head>
+<body class="theme-dark h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950 overflow-hidden">
+
+    <!-- Toast de Notificación Flotante -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 bg-emerald-500 text-slate-950 font-bold px-4 py-3 rounded-2xl shadow-2xl z-50 transition-all duration-300 transform translate-y-24 opacity-0 flex items-center gap-2 text-xs pointer-events-none border border-emerald-400">
+        <span id="toastMsg">✅ Operación realizada con éxito</span>
+    </div>
+
+    <!-- Encabezado Principal -->
+    <header class="h-14 border-b border-slate-800/90 bg-slate-900/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-2 shrink-0 z-40">
+        <div class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-amber-500/20">
+                📚
+            </div>
+            <div>
+                <h1 class="text-xs sm:text-sm font-extrabold tracking-tight text-white flex items-center gap-1.5">
+                    Librería Digital Pro <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono-num border border-amber-500/30">v11.0</span>
+                    <span id="badgeTotalBooks" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-semibold border border-slate-700">0 Libros</span>
+                </h1>
+                <p class="text-[10px] text-slate-400 hidden md:block">Gestión de Lecturas, Sagas, Citas e Historial Completo</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 sm:gap-2">
+            <!-- Botón Racha -->
+            <button id="btnOpenStreak" type="button" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 border border-orange-500/30 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shrink-0">
+                🔥 <span class="hidden lg:inline">Racha:</span> <strong id="headerStreakCount">0 días</strong>
+            </button>
+
+            <!-- Botón Retos -->
+            <button id="btnOpenGoal" type="button" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shrink-0">
+                🎯 <span class="hidden lg:inline">Retos:</span> <strong id="headerGoalPct">0%</strong>
+            </button>
+
+            <!-- Botón Descubrir -->
+            <button id="btnOpenRecommend" type="button" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-purple-600/20 flex items-center gap-1.5 cursor-pointer shrink-0">
+                ✨ <span class="hidden md:inline">Descubrir</span>
+            </button>
+
+            <!-- Selector de Temas -->
+            <select id="selectTheme" class="bg-slate-800 border border-slate-700 text-slate-300 rounded-xl px-2 py-1.5 text-xs font-bold focus:outline-none cursor-pointer">
+                <option value="theme-dark">🌙 Oscuro</option>
+                <option value="theme-sepia">📜 Sepia</option>
+                <option value="theme-light">☀️ Claro</option>
+            </select>
+
+            <!-- MENÚ DESPLEGABLE DE HERRAMIENTAS MÓVIL/DESKTOP -->
+            <div class="relative shrink-0">
+                <button id="btnToolsToggle" type="button" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-semibold transition flex items-center gap-1 cursor-pointer">
+                    ⚙️ <span class="hidden sm:inline">Herramientas</span> ▾
+                </button>
+                <div id="dropdownTools" class="hidden absolute right-0 top-full mt-2 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-2 z-50 w-44 space-y-1 text-xs">
+                    <button id="btnManageGenres" type="button" class="w-full text-left px-2.5 py-2 rounded hover:bg-slate-800 text-slate-200 flex items-center gap-2 cursor-pointer font-medium">🏷️ Géneros y Subgéneros</button>
+                    <button id="btnOpenQuotes" type="button" class="w-full text-left px-2.5 py-2 rounded hover:bg-slate-800 text-slate-200 flex items-center gap-2 cursor-pointer font-medium">💬 Banco de Citas</button>
+                    <button id="btnOpenStats" type="button" class="w-full text-left px-2.5 py-2 rounded hover:bg-slate-800 text-slate-200 flex items-center gap-2 cursor-pointer font-medium">📊 Estadísticas y Graficos</button>
+                    <div class="border-t border-slate-800 my-1"></div>
+                    <button id="btnExportJSON" type="button" class="w-full text-left px-2.5 py-1.5 rounded hover:bg-slate-800 text-slate-200 flex items-center gap-2 cursor-pointer font-medium">💾 Exportar Backup</button>
+                    <label class="w-full text-left px-2.5 py-1.5 rounded hover:bg-slate-800 text-slate-200 flex items-center gap-2 cursor-pointer block font-medium">
+                        📂 Importar Backup
+                        <input type="file" id="inputImportJSON" accept=".json" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botón Añadir Libro -->
+            <button id="btnAddBook" type="button" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold text-xs transition shadow-lg shadow-amber-500/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                <span class="hidden sm:inline">Añadir Libro</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Área de Trabajo Principal -->
+    <main class="flex-1 min-h-0 w-full p-3 sm:p-4 flex flex-col gap-3 overflow-hidden">
+        
+        <!-- Tarjetas Métricas Rápidas -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 shrink-0">
+            <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800/80 shadow-md">
+                <div class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Leídos Este Año</div>
+                <div id="statReadYearCount" class="text-base sm:text-lg font-bold font-mono-num text-emerald-400 mt-0.5">0</div>
+                <div id="statGoalSub" class="text-[9px] text-slate-500 mt-0.5">Meta Anual: 12 libros</div>
+            </div>
+
+            <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800/80 shadow-md">
+                <div class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Leídos Este Mes</div>
+                <div id="statReadMonthCount" class="text-base sm:text-lg font-bold font-mono-num text-teal-400 mt-0.5">0</div>
+                <div id="statMonthlyGoalSub" class="text-[9px] text-slate-500 mt-0.5">Meta Mensual: 2 libros</div>
+            </div>
+
+            <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800/80 shadow-md">
+                <div class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Leyendo Ahora</div>
+                <div id="statReadingCount" class="text-base sm:text-lg font-bold font-mono-num text-sky-400 mt-0.5">0</div>
+                <div class="text-[9px] text-slate-500 mt-0.5">Lectura activa</div>
+            </div>
+
+            <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800/80 shadow-md">
+                <div class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Leídas Hoy</div>
+                <div id="statTodayPages" class="text-base sm:text-lg font-bold font-mono-num text-orange-400 mt-0.5">0 págs</div>
+                <div id="statDailyGoalSub" class="text-[9px] text-slate-500 mt-0.5">Meta: 20 págs/día</div>
+            </div>
+
+            <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800/80 shadow-md">
+                <div class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Págs Restantes (Leyendo)</div>
+                <div id="statPendingPages" class="text-base sm:text-lg font-bold font-mono-num text-amber-400 mt-0.5">0 págs</div>
+                <div class="text-[9px] text-slate-500 mt-0.5">En lectura activa</div>
+            </div>
+
+            <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800/80 shadow-md">
+                <div class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Páginas Totales</div>
+                <div id="statTotalPages" class="text-base sm:text-lg font-bold font-mono-num text-purple-400 mt-0.5">0</div>
+                <div class="text-[9px] text-slate-500 mt-0.5">Acumuladas</div>
+            </div>
+        </div>
+
+        <!-- BARRA DE FILTROS -->
+        <div class="bg-slate-900/90 rounded-2xl p-3 border border-slate-800/80 shadow-md flex flex-col gap-2.5 shrink-0">
+            
+            <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs w-full overflow-x-auto">
+                <button data-filter="all" class="filter-tab active px-3.5 py-1 rounded-lg font-semibold text-slate-400 transition whitespace-nowrap cursor-pointer">
+                    Todos (<span id="cntAll">0</span>)
+                </button>
+                <button data-filter="reading" class="filter-tab px-3.5 py-1 rounded-lg font-semibold text-slate-400 transition whitespace-nowrap cursor-pointer">
+                    Leyendo (<span id="cntReading">0</span>)
+                </button>
+                <button data-filter="read" class="filter-tab px-3.5 py-1 rounded-lg font-semibold text-slate-400 transition whitespace-nowrap cursor-pointer">
+                    Leídos (<span id="cntRead">0</span>)
+                </button>
+                <button data-filter="want" class="filter-tab px-3.5 py-1 rounded-lg font-semibold text-slate-400 transition whitespace-nowrap cursor-pointer">
+                    Pendientes (<span id="cntWant">0</span>)
+                </button>
+                <button data-filter="oldies" class="filter-tab px-3.5 py-1 rounded-lg font-semibold text-purple-400 transition whitespace-nowrap cursor-pointer">
+                    📜 Infancia / Antiguos (<span id="cntOldies">0</span>)
+                </button>
+                <button data-filter="favorites" class="filter-tab px-3.5 py-1 rounded-lg font-semibold text-amber-400 transition whitespace-nowrap flex items-center gap-1 cursor-pointer">
+                    ★ Favoritos (<span id="cntFav">0</span>)
+                </button>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                    <select id="selectGenreFilter" class="bg-slate-950 border border-slate-800 text-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-amber-500 shrink-0">
+                        <option value="all">Todos los Géneros</option>
+                    </select>
+
+                    <select id="selectSubgenreFilter" class="bg-slate-950 border border-slate-800 text-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-amber-500 shrink-0">
+                        <option value="all">Todos los Subgéneros</option>
+                    </select>
+
+                    <select id="selectFormatFilter" class="bg-slate-950 border border-slate-800 text-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-amber-500 shrink-0">
+                        <option value="all">Todos Formatos</option>
+                        <option value="physical">📖 Físico</option>
+                        <option value="ebook">📱 eBook</option>
+                    </select>
+
+                    <div class="relative flex-1 min-w-[160px]">
+                        <svg class="w-4 h-4 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input type="text" id="inputSearch" placeholder="Buscar título, autor..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+                    </div>
+
+                    <select id="selectSort" class="bg-slate-950 border border-slate-800 text-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-amber-500 shrink-0">
+                        <option value="recent">Recientes</option>
+                        <option value="author">Autor (A-Z)</option>
+                        <option value="title">Título (A-Z)</option>
+                        <option value="rating_desc">Mayor Rating</option>
+                        <option value="progress_desc">Mayor Progreso %</option>
+                        <option value="pages_desc">Más páginas</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1 shrink-0">
+                    <button id="btnViewGrid" type="button" class="view-btn active p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer shrink-0" title="Vista Cuadrícula">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    </button>
+                    <button id="btnViewTable" type="button" class="view-btn p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer shrink-0" title="Vista Lista/Tabla">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    </button>
+                    <button id="btnViewAuthor" type="button" class="view-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white transition text-xs font-bold flex items-center gap-1.5 shrink-0 cursor-pointer whitespace-nowrap" title="Agrupar por Autor">
+                        📁 <span>Por Autor</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenedor Principal de Libros -->
+        <div id="booksContainer" class="flex-1 min-h-0 overflow-y-auto pr-1"></div>
+
+    </main>
+
+    <!-- MODAL AJUSTAR PÁGINAS (+ / - / EXACTO) -->
+    <div id="modalPageAdjust" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 id="adjustBookTitle" class="text-xs font-bold text-white uppercase tracking-wider line-clamp-1">
+                    ⚡ Ajustar Páginas
+                </h3>
+                <button id="btnCloseAdjust" type="button" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="text-center bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                <div class="text-[10px] text-slate-400 uppercase font-bold">Estado Actual</div>
+                <div id="adjustCurrentDisplay" class="text-lg font-black text-emerald-400 font-mono-num">0 / 0 págs (0%)</div>
+            </div>
+
+            <div class="space-y-3">
+                <!-- Sumar o Restar Páginas -->
+                <div class="space-y-1.5">
+                    <label class="text-[11px] text-amber-400 font-bold block">1. Sumar o Restar Páginas Leídas Hoy</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="inputAdjustValue" min="1" placeholder="Ej: 15" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white font-mono-num focus:outline-none focus:border-amber-500">
+                        <button id="btnDoAddPages" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition cursor-pointer">+ Sumar</button>
+                        <button id="btnDoSubPages" type="button" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition cursor-pointer">- Restar</button>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-800 my-2"></div>
+
+                <!-- Establecer exacto -->
+                <div class="space-y-1.5">
+                    <label class="text-[11px] text-sky-400 font-bold block">2. Fijar Número de Página Exacta</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="inputExactPageValue" min="0" placeholder="Ej: 140" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white font-mono-num focus:outline-none focus:border-sky-500">
+                        <button id="btnSetExactPage" type="button" class="px-4 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition cursor-pointer">Fijar Exacto</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN SEGURO (SUSTITUYE A CONFIRM Y ALERT NATIVO) -->
+    <div id="modalConfirm" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center gap-2 text-amber-400 font-bold text-sm border-b border-slate-800 pb-2">
+                <span>⚠️</span> <span id="confirmModalTitle">Confirmación Requerida</span>
+            </div>
+            <p id="confirmModalMsg" class="text-xs text-slate-300 leading-relaxed">¿Estás seguro de realizar esta acción?</p>
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button id="btnConfirmNo" type="button" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Cancelar</button>
+                <button id="btnConfirmYes" type="button" class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition cursor-pointer">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CALENDARIO Y RACHA -->
+    <div id="modalStreakCalendar" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    🔥 Hábito de Lectura & Calendario Mensual
+                </h3>
+                <button id="btnCloseStreak" type="button" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                    <span class="text-[10px] text-slate-400 uppercase font-bold block">Racha Activa</span>
+                    <div id="streakModalCount" class="text-2xl font-extrabold text-orange-400 font-mono-num mt-1">0 Días</div>
+                    <span class="text-[9px] text-slate-500">Días consecutivos leídos</span>
+                </div>
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                    <span class="text-[10px] text-slate-400 uppercase font-bold block">Hoy Leídas</span>
+                    <div id="todayPagesModal" class="text-2xl font-extrabold text-emerald-400 font-mono-num mt-1">0 Págs</div>
+                    <span id="streakGoalTargetSub" class="text-[9px] text-slate-500">Meta: 20 págs/día</span>
+                </div>
+            </div>
+
+            <!-- REGISTRO CON SELECCIÓN DE LIBRO -->
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-emerald-400">⚡ Registrar Lectura Diaria por Libro</span>
+                    <span id="dailyGoalStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded"></span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <select id="selectBookForLog" class="sm:col-span-2 bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white font-medium focus:outline-none focus:border-emerald-500"></select>
+                    <div class="flex items-center gap-1.5">
+                        <input type="number" id="inputQuickAddTodayPages" min="1" placeholder="Págs" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono-num focus:outline-none focus:border-emerald-500">
+                        <button id="btnQuickAddTodayPages" type="button" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer shrink-0">+ Sumar</button>
+                    </div>
+                </div>
+                <p id="dailyGoalStatusMsg" class="text-[10px] text-slate-400 font-mono-num"></p>
+            </div>
+
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-rose-500/30 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-rose-400">✏️ Corregir Páginas de Hoy</span>
+                    <span class="text-[9px] text-slate-500">Ajustar acumulado total del día</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="number" id="inputExactTodayPages" min="0" placeholder="Ej: 40" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white font-mono-num focus:outline-none focus:border-rose-500">
+                    <button id="btnSetExactTodayPages" type="button" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl transition cursor-pointer">Establecer Exacto</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-amber-400">Meta Diaria de Páginas Mínimas</label>
+                    <input type="number" id="inputDailyPageGoal" min="1" max="500" value="20" class="w-20 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-white font-mono-num text-center font-bold focus:outline-none">
+                </div>
+                <button id="btnSaveDailyGoal" type="button" class="w-full py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer">Guardar Meta Diaria</button>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-300">
+                    <span id="calendarMonthYear">Mes Actual</span>
+                    <div class="flex gap-2 text-[10px]">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Meta Cumplida</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-500"></span> Parcial</span>
+                    </div>
+                </div>
+                <div id="calendarGrid" class="grid grid-cols-7 gap-1 bg-slate-950 p-2.5 rounded-xl border border-slate-800"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RETOS ANUALES Y MENSUALES -->
+    <div id="modalGoal" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    🎯 Retos de Lectura Anual & Mensual
+                </h3>
+                <button id="btnCloseGoal" type="button" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-bold text-amber-400">Meta Anual de Libros</label>
+                        <input type="number" id="inputAnnualGoal" min="1" max="300" class="w-20 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-amber-400 font-bold text-xs font-mono-num text-center focus:outline-none">
+                    </div>
+                    <div class="flex justify-between text-xs font-mono-num pt-1">
+                        <span class="text-slate-400">Progreso Año:</span>
+                        <span id="goalAnnualModalStats" class="text-emerald-400 font-bold">0 / 12 libros (0%)</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                        <div id="goalAnnualModalBar" class="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-bold text-teal-400">Meta Mensual de Libros</label>
+                        <input type="number" id="inputMonthlyGoal" min="1" max="50" class="w-20 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-teal-400 font-bold text-xs font-mono-num text-center focus:outline-none">
+                    </div>
+                    <div class="flex justify-between text-xs font-mono-num pt-1">
+                        <span class="text-slate-400">Progreso Este Mes:</span>
+                        <span id="goalMonthlyModalStats" class="text-teal-400 font-bold">0 / 2 libros (0%)</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                        <div id="goalMonthlyModalBar" class="h-full bg-gradient-to-r from-teal-500 to-sky-500 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <button id="btnSaveGoal" type="button" class="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold text-xs transition cursor-pointer shadow-md">
+                    Guardar Todas las Metas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRO / EDICIÓN DE LIBRO CON API AUTOCOMPLETE CORREGIDA -->
+    <div id="modalBook" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto p-5 shadow-2xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 id="modalTitle" class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="p-1 rounded bg-amber-500/20 text-amber-400">📖</span> Registrar / Editar Libro
+                </h3>
+                <button id="btnCloseModal" type="button" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- API Search Box -->
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+                <label class="text-[11px] text-amber-400 font-bold block flex items-center gap-1.5">
+                    <span>⚡ Autocompletar Automático por API (Google Books)</span>
+                </label>
+                <div class="relative">
+                    <input type="text" id="apiSearchQuery" placeholder="Buscar título o ISBN (ej: Dune, 9789500700185)..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+                    <div id="apiSearchResults" class="absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto hidden"></div>
+                </div>
+            </div>
+
+            <form id="formBook" class="space-y-4 text-xs">
+                <input type="hidden" id="bookId">
+
+                <div class="space-y-2">
+                    <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-800/80 pb-1">
+                        <span class="w-2 h-2 rounded-full bg-amber-400"></span> Datos Principales
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="text-slate-400 font-medium block mb-1">Título del Libro *</label>
+                            <input type="text" id="inputTitle" placeholder="Ej: Hábitos Atómicos" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 font-medium block mb-1">Autor / Co-Autores *</label>
+                            <input type="text" id="inputAuthor" placeholder="Ej: James Clear" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="text-slate-400 font-medium block mb-1">Género Principal *</label>
+                            <select id="selectBookGenre" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-amber-400 font-bold focus:outline-none focus:border-amber-500"></select>
+                        </div>
+                        <div>
+                            <label class="text-slate-400 font-medium block mb-1">Subgénero *</label>
+                            <select id="selectBookSubgenre" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-sky-400 font-bold focus:outline-none focus:border-sky-500"></select>
+                        </div>
+                        <div>
+                            <label class="text-slate-400 font-medium block mb-1">Editorial</label>
+                            <input type="text" id="inputPublisher" placeholder="Ej: Paidós" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 font-medium block mb-1">ISBN</label>
+                            <input type="text" id="inputISBN" placeholder="Ej: 9789501298412" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white font-mono-num focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 border-t border-slate-800 pt-3">
+                    <div>
+                        <label class="text-slate-400 font-medium block mb-1">Tipo de Obra</label>
+                        <select id="selectWorkType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-medium focus:outline-none">
+                            <option value="single">Libro Único</option>
+                            <option value="series">Parte de Saga / Serie</option>
+                        </select>
+                    </div>
+                    <div id="seriesInputContainer" class="hidden">
+                        <label class="text-slate-400 font-medium block mb-1">Saga / Vol.</label>
+                        <input type="text" id="inputSeries" placeholder="Ej: Dune #1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-amber-300 font-medium focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 font-medium block mb-1">Formato</label>
+                        <select id="selectFormat" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-medium focus:outline-none">
+                            <option value="physical">📖 Físico</option>
+                            <option value="ebook">📱 eBook</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-slate-400 font-medium block mb-1">Adquisición</label>
+                        <select id="selectOwnership" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-medium focus:outline-none">
+                            <option value="owned">En posesión</option>
+                            <option value="wishlist">Por comprar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2 bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
+                    <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-800/80 pb-1">
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Progreso de Lectura</span>
+                        <span id="dispProgressPct" class="font-mono-num text-emerald-400 font-bold text-xs">0% AVANCE</span>
+                    </h4>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="text-slate-400 font-medium block mb-1">Estado de Lectura</label>
+                            <select id="selectStatus" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-bold focus:outline-none focus:border-emerald-500">
+                                <option value="reading">Leyendo</option>
+                                <option value="read">Leído</option>
+                                <option value="want">Pendiente</option>
+                            </select>
+                        </div>
+                        <div id="currentPageWrapper">
+                            <label class="text-slate-400 font-medium block mb-1">Página Actual</label>
+                            <input type="number" id="inputCurrentPage" value="0" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-emerald-400 font-bold font-mono-num focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 font-medium block mb-1">Páginas Totales</label>
+                            <input type="number" id="inputPages" placeholder="Ej: 320" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-white font-bold font-mono-num focus:outline-none focus:border-emerald-500">
+                        </div>
+                        
+                        <div>
+                            <label class="text-slate-400 font-medium block mb-1">¿Es Relectura?</label>
+                            <div class="flex items-center gap-2">
+                                <select id="selectIsReread" class="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-bold focus:outline-none">
+                                    <option value="no">No</option>
+                                    <option value="yes">Sí</option>
+                                </select>
+                                <input type="number" id="inputRereadCount" value="0" placeholder="N°" class="hidden w-16 bg-slate-900 border border-slate-800 rounded-xl px-2 py-1.5 text-amber-400 font-mono-num font-bold text-center focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="readingDatesSection" class="pt-2 border-t border-slate-800/80 space-y-2">
+                        <label class="flex items-center gap-2 cursor-pointer select-none text-purple-300 font-semibold">
+                            <input type="checkbox" id="chkApproxYear" class="rounded bg-slate-950 border-slate-800 text-purple-500 w-4 h-4 cursor-pointer">
+                            <span>📜 Lectura Antigua / Infancia (Sin fecha exacta)</span>
+                        </label>
+
+                        <div id="exactDatesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-slate-400 font-medium block mb-1">Fecha de Inicio</label>
+                                <input type="date" id="inputStartDate" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 font-mono-num focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-slate-400 font-medium block mb-1">Fecha de Término</label>
+                                <input type="date" id="inputEndDate" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 font-mono-num focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div id="approxYearContainer" class="hidden">
+                            <label class="text-purple-300 font-medium block mb-1">Año Aproximado de Lectura</label>
+                            <input type="text" id="inputApproxYear" placeholder="Ej: 2012, 2015, Infancia" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-purple-200 font-mono-num focus:outline-none focus:border-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+                    <div>
+                        <label class="text-slate-400 font-medium block mb-1">Rating</label>
+                        <div class="flex items-center gap-2">
+                            <select id="selectRating" class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-amber-400 font-bold focus:outline-none">
+                                <option value="5">5.0 ★★★★★</option>
+                                <option value="4.5">4.5 ★★★★☆</option>
+                                <option value="4">4.0 ★★★★☆</option>
+                                <option value="3.5">3.5 ★★★☆☆</option>
+                                <option value="3">3.0 ★★★☆☆</option>
+                                <option value="2">2.0 ★★☆☆☆</option>
+                                <option value="1">1.0 ★☆☆☆☆</option>
+                            </select>
+                            <label class="flex items-center gap-1.5 cursor-pointer text-amber-400 font-semibold select-none">
+                                <input type="checkbox" id="chkFavorite" class="rounded bg-slate-950 border-slate-800 text-amber-500 w-4 h-4">
+                                <span>Favorito</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-slate-400 font-medium block mb-1">URL Portada (o Enlace)</label>
+                        <input type="text" id="inputCover" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-2 border-t border-slate-800">
+                    <div>
+                        <label class="text-slate-400 font-medium block mb-1">Opinión / Crítica Personal</label>
+                        <textarea id="textareaReview" rows="2" placeholder="Tus impresiones del libro..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"></textarea>
+                    </div>
+
+                    <div class="space-y-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <label class="text-amber-400 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                                💬 Citas Destacadas
+                            </label>
+                            <button id="btnAddQuoteRow" type="button" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[10px] border border-amber-500/30 transition cursor-pointer">
+                                + Agregar Cita
+                            </button>
+                        </div>
+                        <div id="quotesListInputsContainer" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                    <button type="button" id="btnCancelForm" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition cursor-pointer">Cancelar</button>
+                    <button id="btnSubmitBook" type="button" class="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold transition shadow-md cursor-pointer">Guardar Libro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL GESTIÓN DE GÉNEROS -->
+    <div id="modalGenres" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    🏷️ Administrador de Géneros y Subgéneros
+                </h3>
+                <button id="btnCloseGenres" type="button" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="formNewMainGenre" class="space-y-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">1. Añadir Nuevo Género Principal</span>
+                <div class="flex gap-2">
+                    <input type="text" id="inputNewMainGenreName" required placeholder="Ej: Poesía, Cómics, Manga..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                    <button type="submit" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer">+ Crear</button>
+                </div>
+            </form>
+
+            <form id="formNewSubgenre" class="space-y-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <span class="text-[10px] font-bold text-sky-400 uppercase tracking-wider block">2. Añadir Subgénero a un Género</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="selectParentGenreForNew" class="bg-slate-900 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white font-medium focus:outline-none"></select>
+                    <input type="text" id="inputNewSubgenreName" required placeholder="Ej: Space Opera..." class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-500">
+                </div>
+                <button type="submit" class="w-full py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition cursor-pointer">+ Guardar Subgénero</button>
+            </form>
+
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Estructura Actual:</span>
+                <div id="genresTreeContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RECOMENDADOR "DESCUBRIR" CON TIMEOUT DE 3S -->
+    <div id="modalRecommend" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-3xl w-full max-h-[88vh] overflow-y-auto p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div>
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                        ✨ Motor Inteligente de Recomendaciones
+                    </h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Sugerencias basadas en tus autores y géneros favoritos</p>
+                </div>
+                <button id="btnCloseRecommend" type="button" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div id="recommendationsList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        </div>
+    </div>
+
+    <!-- MODAL BANCO DE CITAS -->
+    <div id="modalQuotes" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-3xl w-full max-h-[88vh] overflow-y-auto p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    💬 Banco Unificado de Citas
+                </h3>
+                <button id="btnCloseQuotes" type="button" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                <input type="text" id="inputQuotesSearch" placeholder="Buscar en texto o autor..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+                <select id="selectQuotesGenreFilter" class="bg-slate-900 border border-slate-800 text-slate-300 rounded-lg px-2 py-1.5 text-xs font-medium focus:outline-none">
+                    <option value="all">Todos los Géneros</option>
+                </select>
+                <select id="selectQuotesSort" class="bg-slate-900 border border-slate-800 text-slate-300 rounded-lg px-2 py-1.5 text-xs font-medium focus:outline-none">
+                    <option value="recent">Recientes</option>
+                    <option value="author">Autor (A-Z)</option>
+                    <option value="title">Título (A-Z)</option>
+                </select>
+            </div>
+
+            <div id="quotesBankContainer" class="space-y-3 max-h-[58vh] overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
+    <!-- MODAL ANALÍTICA Y ESTADÍSTICAS -->
+    <div id="modalStats" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div>
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                        📊 Tablero de Analítica & Estadísticas Avanzadas
+                    </h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Métricas de rendimiento de lectura y hábitos acumulados</p>
+                </div>
+                <button id="btnCloseStats" type="button" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-gradient-to-br from-slate-950 to-slate-900 p-3 rounded-xl border border-amber-500/20 shadow-lg">
+                    <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Velocidad Promedio</div>
+                    <div id="kpiReadingSpeed" class="text-lg font-black font-mono-num text-white mt-1">0 p/día</div>
+                    <div class="text-[9px] text-slate-500">En días con registro</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-slate-950 to-slate-900 p-3 rounded-xl border border-sky-500/20 shadow-lg">
+                    <div class="text-[10px] font-bold text-sky-400 uppercase tracking-wider">Libro Más Largo</div>
+                    <div id="kpiLongestBook" class="text-lg font-black font-mono-num text-white mt-1">0 págs</div>
+                    <div id="kpiLongestBookTitle" class="text-[9px] text-slate-500 line-clamp-1">-</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-slate-950 to-slate-900 p-3 rounded-xl border border-purple-500/20 shadow-lg">
+                    <div class="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Total Relecturas</div>
+                    <div id="kpiTotalRereads" class="text-lg font-black font-mono-num text-white mt-1">0 veces</div>
+                    <div class="text-[9px] text-slate-500">Libros releídos</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-slate-950 to-slate-900 p-3 rounded-xl border border-emerald-500/20 shadow-lg">
+                    <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Total Citas Guardadas</div>
+                    <div id="kpiTotalQuotes" class="text-lg font-black font-mono-num text-white mt-1">0 citas</div>
+                    <div class="text-[9px] text-slate-500">En toda la librería</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center shadow-md">
+                    <h4 class="text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-2">Libros por Género</h4>
+                    <div class="w-full h-56 relative">
+                        <canvas id="chartGenres"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center shadow-md">
+                    <h4 class="text-[11px] font-bold text-sky-400 uppercase tracking-wider mb-2">Distribución por Estado de Lectura</h4>
+                    <div class="w-full h-56 relative">
+                        <canvas id="chartStatus"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETALLE EXTENDIDO DE LIBRO CON ELIMINACIÓN SEGURA -->
+    <div id="modalDetail" style="display: none;" class="modal-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-3">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto p-5 shadow-2xl space-y-4">
+            <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-3">
+                    <img id="detailCover" src="" class="w-16 h-24 object-cover rounded-xl shadow-md border border-slate-800">
+                    <div class="space-y-1">
+                        <div id="detailStatusBadge" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase">Leído</div>
+                        <h3 id="detailTitle" class="text-base font-bold text-white leading-tight">Título del Libro</h3>
+                        <p id="detailAuthor" class="text-xs text-amber-400 font-medium">Por Autor</p>
+                        <div class="flex items-center gap-1.5 pt-0.5">
+                            <span id="detailGenreTag" class="px-2 py-0.5 rounded-full bg-slate-800 text-amber-300 font-mono-num text-[10px]">Género</span>
+                            <span id="detailSubgenreTag" class="px-2 py-0.5 rounded-full bg-slate-800 text-sky-300 font-mono-num text-[10px]">Subgénero</span>
+                            <span id="detailFormatTag" class="px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 font-mono-num text-[10px]">Formato</span>
+                            <span id="detailSeriesTag" class="hidden px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono-num text-[10px] border border-purple-500/30">Saga</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="btnCloseDetail" type="button" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono-num">
+                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                    <span class="text-[10px] text-slate-500 block">Rating</span>
+                    <span id="detailRating" class="font-bold text-amber-400">5.0 ★</span>
+                </div>
+                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                    <span class="text-[10px] text-slate-500 block">Progreso</span>
+                    <span id="detailProgress" class="font-bold text-emerald-400">0 / 0 págs</span>
+                </div>
+                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                    <span class="text-[10px] text-slate-500 block">Editorial / ISBN</span>
+                    <span id="detailEditorial" class="font-medium text-slate-300">-</span>
+                </div>
+                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                    <span class="text-[10px] text-slate-500 block">Posesión / Período</span>
+                    <span id="detailDates" class="font-medium text-purple-300 block leading-tight">-</span>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Crítica Personal</h4>
+                <div id="detailReview" class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed whitespace-pre-wrap italic">
+                    Sin crítica escrita.
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Citas Destacadas</h4>
+                <div id="detailQuotes" class="space-y-1.5"></div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+                <button id="btnDeleteFromDetail" type="button" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold text-xs border border-rose-500/20 transition cursor-pointer">🗑️ Eliminar Libro</button>
+                <div class="flex gap-2">
+                    <button id="btnEditFromDetail" type="button" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold text-xs border border-amber-500/30 transition cursor-pointer">Editar Ficha</button>
+                    <button id="btnCloseDetail2" type="button" class="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition cursor-pointer">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal v11.0 -->
+    <script>
+        (function() {
+            const STORAGE_KEY = 'gemini_pro_library_v4';
+            const GENRES_STORAGE_KEY = 'gemini_pro_genres_tree_v4';
+            const GOAL_STORAGE_KEY = 'gemini_pro_goal_v4';
+            const MONTHLY_GOAL_STORAGE_KEY = 'gemini_pro_monthly_goal_v5';
+            const LOG_STORAGE_KEY = 'gemini_pro_reading_log_v4.5';
+            const DAILY_GOAL_KEY = 'gemini_pro_daily_page_goal_v4.5';
+            const THEME_STORAGE_KEY = 'gemini_pro_theme_v1';
+
+            // ÁRBOL AMPLIADO DE GÉNEROS Y SUBGÉNEROS PREDETERMINADOS
+            const DEFAULT_GENRES_TREE = {
+                'Ciencia Ficción': ['Cyberpunk', 'Space Opera', 'Distopía', 'Hard Sci-Fi', 'Viajes en el Tiempo'],
+                'Fantasía': ['Alta Fantasía', 'Fantasía Urbana', 'Mitología', 'Dark Fantasy'],
+                'Realismo Mágico & Ficción': ['Latinoamericano', 'Contemporáneo', 'Ficción Histórica', 'Clásicos Universales'],
+                'Cuentos & Antologías': ['Cuentos Clásicos', 'Relatos Cortos', 'Microficción', 'Antologías'],
+                'Poesía & Teatro': ['Poesía Clásica', 'Poesía Contemporánea', 'Dramaturgia / Teatro'],
+                'Cómics, Manga & Novela Gráfica': ['Manga Shonen', 'Manga Seinen', 'Manga Shojo', 'Cómic Occidental', 'Novela Gráfica'],
+                'Ensayo & No Ficción': ['Divulgación Científica', 'Historia', 'Biografía / Memorias', 'Filosofía', 'Ensayo Político', 'Periodismo Narrativo'],
+                'Desarrollo Personal': ['Productividad', 'Psicología', 'Hábitos', 'Finanzas Personales'],
+                'Terror & Suspenso': ['Terror Psicológico', 'Thriller', 'Gótico', 'Misterio'],
+                'Infantil & Juvenil': ['Literatura Infantil', 'Young Adult (YA)', 'Fábulas y Mitos']
+            };
+
+            const INITIAL_BOOKS = [
+                {
+                    id: '1',
+                    title: 'Cien años de soledad',
+                    author: 'Gabriel García Márquez',
+                    genre: 'Realismo Mágico & Ficción',
+                    subgenre: 'Latinoamericano',
+                    publisher: 'Editorial Sudamericana',
+                    isbn: '9789500700185',
+                    workType: 'single',
+                    series: '',
+                    format: 'physical',
+                    ownership: 'owned',
+                    status: 'read',
+                    currentPage: 417,
+                    pages: 417,
+                    rereadStatus: 'yes',
+                    rereadCount: 1,
+                    startDate: '2026-08-01',
+                    endDate: '2026-08-18',
+                    isApproxYear: false,
+                    approxYear: '',
+                    rating: 5.0,
+                    favorite: true,
+                    cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80',
+                    review: 'Una obra cumbre de la literatura universal.',
+                    quotesList: [
+                        'Muchos años después, frente al pelotón de fusilamiento...',
+                        'El secreto de una buena vejez es un pacto honrado con la soledad.'
+                    ]
+                },
+                {
+                    id: '2',
+                    title: 'Dune',
+                    author: 'Frank Herbert',
+                    genre: 'Ciencia Ficción',
+                    subgenre: 'Space Opera',
+                    publisher: 'Debolsillo',
+                    isbn: '9788497596824',
+                    workType: 'series',
+                    series: 'Dune #1',
+                    format: 'physical',
+                    ownership: 'owned',
+                    status: 'reading',
+                    currentPage: 180,
+                    pages: 704,
+                    rereadStatus: 'no',
+                    rereadCount: 0,
+                    startDate: '2026-09-10',
+                    endDate: '',
+                    isApproxYear: false,
+                    approxYear: '',
+                    rating: 4.5,
+                    favorite: true,
+                    cover: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=400&q=80',
+                    review: 'Impresionante construcción de mundo.',
+                    quotesList: [
+                        'El miedo es el asesino de la mente.'
+                    ]
+                }
+            ];
+
+            let books = [];
+            let genresTree = {};
+            let annualGoal = 12;
+            let monthlyGoal = 2;
+            let readingLog = {};
+            let dailyPageGoal = 20;
+
+            let currentFilter = 'all';
+            let currentGenreFilter = 'all';
+            let currentSubgenreFilter = 'all';
+            let currentFormatFilter = 'all';
+            let currentSort = 'recent';
+            let currentSearch = '';
+            let currentViewMode = 'grid';
+            let activeDetailBookId = null;
+            let activeAdjustBookId = null;
+
+            let chartGenresInstance = null;
+            let chartStatusInstance = null;
+
+            function showModal(el) { if (el) el.style.display = 'flex'; }
+            function hideModal(el) { if (el) el.style.display = 'none'; }
+
+            function showToast(msg) {
+                const toast = document.getElementById('toastNotification');
+                const msgSpan = document.getElementById('toastMsg');
+                if (toast && msgSpan) {
+                    msgSpan.textContent = msg;
+                    toast.classList.remove('translate-y-24', 'opacity-0');
+                    setTimeout(() => {
+                        toast.classList.add('translate-y-24', 'opacity-0');
+                    }, 3000);
+                }
+            }
+
+            function showCustomConfirm(title, message, onConfirm) {
+                document.getElementById('confirmModalTitle').textContent = title;
+                document.getElementById('confirmModalMsg').textContent = message;
+                
+                const btnYes = document.getElementById('btnConfirmYes');
+                const btnNo = document.getElementById('btnConfirmNo');
+                const modal = document.getElementById('modalConfirm');
+                
+                showModal(modal);
+                
+                const newYes = btnYes.cloneNode(true);
+                const newNo = btnNo.cloneNode(true);
+                btnYes.parentNode.replaceChild(newYes, btnYes);
+                btnNo.parentNode.replaceChild(newNo, btnNo);
+                
+                newYes.addEventListener('click', () => {
+                    hideModal(modal);
+                    if (typeof onConfirm === 'function') onConfirm();
+                });
+                
+                newNo.addEventListener('click', () => {
+                    hideModal(modal);
+                });
+            }
+
+            function getTodayStr() {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+
+            function getCurrentYearStr() { return new Date().getFullYear().toString(); }
+            function getCurrentYearMonthStr() {
+                const today = new Date();
+                return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            }
+
+            function logPagesRead(count) {
+                if (!count || count <= 0) return;
+                const today = getTodayStr();
+                readingLog[today] = (readingLog[today] || 0) + count;
+                saveData();
+            }
+
+            function calculateStreak() {
+                const today = new Date();
+                let streak = 0;
+                let curr = new Date(today);
+                
+                const todayStr = getTodayStr();
+                const todayPages = readingLog[todayStr] || 0;
+                
+                if (todayPages >= dailyPageGoal) {
+                    streak++;
+                    curr.setDate(curr.getDate() - 1);
+                } else {
+                    curr.setDate(curr.getDate() - 1);
+                }
+
+                while (true) {
+                    const yyyy = curr.getFullYear();
+                    const mm = String(curr.getMonth() + 1).padStart(2, '0');
+                    const dd = String(curr.getDate()).padStart(2, '0');
+                    const dateStr = `${yyyy}-${mm}-${dd}`;
+                    
+                    if ((readingLog[dateStr] || 0) >= dailyPageGoal) {
+                        streak++;
+                        curr.setDate(curr.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+                return streak;
+            }
+
+            function getFormatBadgeHTML(format) {
+                if (format === 'ebook') {
+                    return '<span class="px-1.5 py-0.5 rounded bg-slate-950/80 text-sky-300 font-mono-num text-[9px] border border-slate-800/80">📱 eBook</span>';
+                }
+                return '<span class="px-1.5 py-0.5 rounded bg-slate-950/80 text-emerald-300 font-mono-num text-[9px] border border-slate-800/80">📖 Físico</span>';
+            }
+
+            // Elementos DOM
+            const booksContainer = document.getElementById('booksContainer');
+            const btnAddBook = document.getElementById('btnAddBook');
+            const modalBook = document.getElementById('modalBook');
+            const btnCloseModal = document.getElementById('btnCloseModal');
+            const btnCancelForm = document.getElementById('btnCancelForm');
+            const formBook = document.getElementById('formBook');
+
+            const selectBookGenre = document.getElementById('selectBookGenre');
+            const selectBookSubgenre = document.getElementById('selectBookSubgenre');
+            const selectGenreFilter = document.getElementById('selectGenreFilter');
+            const selectSubgenreFilter = document.getElementById('selectSubgenreFilter');
+            const selectFormatFilter = document.getElementById('selectFormatFilter');
+
+            const modalGenres = document.getElementById('modalGenres');
+            const btnManageGenres = document.getElementById('btnManageGenres');
+            const btnCloseGenres = document.getElementById('btnCloseGenres');
+            const formNewMainGenre = document.getElementById('formNewMainGenre');
+            const formNewSubgenre = document.getElementById('formNewSubgenre');
+            const genresTreeContainer = document.getElementById('genresTreeContainer');
+
+            const modalRecommend = document.getElementById('modalRecommend');
+            const btnOpenRecommend = document.getElementById('btnOpenRecommend');
+            const btnCloseRecommend = document.getElementById('btnCloseRecommend');
+            const recommendationsList = document.getElementById('recommendationsList');
+
+            const modalGoal = document.getElementById('modalGoal');
+            const btnOpenGoal = document.getElementById('btnOpenGoal');
+            const btnCloseGoal = document.getElementById('btnCloseGoal');
+            const btnSaveGoal = document.getElementById('btnSaveGoal');
+            const inputAnnualGoal = document.getElementById('inputAnnualGoal');
+            const inputMonthlyGoal = document.getElementById('inputMonthlyGoal');
+
+            const modalQuotes = document.getElementById('modalQuotes');
+            const btnOpenQuotes = document.getElementById('btnOpenQuotes');
+            const btnCloseQuotes = document.getElementById('btnCloseQuotes');
+            const quotesBankContainer = document.getElementById('quotesBankContainer');
+            const inputQuotesSearch = document.getElementById('inputQuotesSearch');
+            const selectQuotesGenreFilter = document.getElementById('selectQuotesGenreFilter');
+            const selectQuotesSort = document.getElementById('selectQuotesSort');
+
+            const modalStats = document.getElementById('modalStats');
+            const btnOpenStats = document.getElementById('btnOpenStats');
+            const btnCloseStats = document.getElementById('btnCloseStats');
+
+            const modalDetail = document.getElementById('modalDetail');
+            const btnCloseDetail = document.getElementById('btnCloseDetail');
+            const btnCloseDetail2 = document.getElementById('btnCloseDetail2');
+            const btnEditFromDetail = document.getElementById('btnEditFromDetail');
+            const btnDeleteFromDetail = document.getElementById('btnDeleteFromDetail');
+
+            const modalStreakCalendar = document.getElementById('modalStreakCalendar');
+            const btnOpenStreak = document.getElementById('btnOpenStreak');
+            const btnCloseStreak = document.getElementById('btnCloseStreak');
+            const inputDailyPageGoal = document.getElementById('inputDailyPageGoal');
+            const btnSaveDailyGoal = document.getElementById('btnSaveDailyGoal');
+            const inputQuickAddTodayPages = document.getElementById('inputQuickAddTodayPages');
+            const btnQuickAddTodayPages = document.getElementById('btnQuickAddTodayPages');
+            const selectBookForLog = document.getElementById('selectBookForLog');
+            
+            const inputExactTodayPages = document.getElementById('inputExactTodayPages');
+            const btnSetExactTodayPages = document.getElementById('btnSetExactTodayPages');
+
+            const inputSearch = document.getElementById('inputSearch');
+            const selectSort = document.getElementById('selectSort');
+            const btnViewGrid = document.getElementById('btnViewGrid');
+            const btnViewTable = document.getElementById('btnViewTable');
+            const btnViewAuthor = document.getElementById('btnViewAuthor');
+            
+            const btnToolsToggle = document.getElementById('btnToolsToggle');
+            const dropdownTools = document.getElementById('dropdownTools');
+            const btnExportJSON = document.getElementById('btnExportJSON');
+            const inputImportJSON = document.getElementById('inputImportJSON');
+            const selectTheme = document.getElementById('selectTheme');
+
+            const modalPageAdjust = document.getElementById('modalPageAdjust');
+            const btnCloseAdjust = document.getElementById('btnCloseAdjust');
+            const inputAdjustValue = document.getElementById('inputAdjustValue');
+            const btnDoAddPages = document.getElementById('btnDoAddPages');
+            const btnDoSubPages = document.getElementById('btnDoSubPages');
+            const inputExactPageValue = document.getElementById('inputExactPageValue');
+            const btnSetExactPage = document.getElementById('btnSetExactPage');
+
+            const apiSearchQuery = document.getElementById('apiSearchQuery');
+            const apiSearchResults = document.getElementById('apiSearchResults');
+
+            const chkApproxYear = document.getElementById('chkApproxYear');
+            const exactDatesContainer = document.getElementById('exactDatesContainer');
+            const approxYearContainer = document.getElementById('approxYearContainer');
+
+            const selectWorkType = document.getElementById('selectWorkType');
+            const seriesInputContainer = document.getElementById('seriesInputContainer');
+            const selectOwnership = document.getElementById('selectOwnership');
+
+            const selectStatus = document.getElementById('selectStatus');
+            const currentPageWrapper = document.getElementById('currentPageWrapper');
+            const inputCurrentPage = document.getElementById('inputCurrentPage');
+            const inputPages = document.getElementById('inputPages');
+            const dispProgressPct = document.getElementById('dispProgressPct');
+
+            const selectIsReread = document.getElementById('selectIsReread');
+            const inputRereadCount = document.getElementById('inputRereadCount');
+
+            const btnAddQuoteRow = document.getElementById('btnAddQuoteRow');
+            const quotesListInputsContainer = document.getElementById('quotesListInputsContainer');
+
+            // CONTROL DEL MENÚ DESPLEGABLE
+            btnToolsToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownTools.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dropdownTools.contains(e.target) && e.target !== btnToolsToggle) {
+                    dropdownTools.classList.add('hidden');
+                }
+            });
+
+            // CONTROL DE TEMAS DE COLOR
+            selectTheme.addEventListener('change', (e) => {
+                const theme = e.target.value;
+                document.body.className = `${theme} h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950 overflow-hidden`;
+                localStorage.setItem(THEME_STORAGE_KEY, theme);
+            });
+
+            selectIsReread.addEventListener('change', () => {
+                if (selectIsReread.value === 'yes') {
+                    inputRereadCount.classList.remove('hidden');
+                    if (parseInt(inputRereadCount.value) <= 0) inputRereadCount.value = 1;
+                } else {
+                    inputRereadCount.classList.add('hidden');
+                    inputRereadCount.value = 0;
+                }
+            });
+
+            selectWorkType.addEventListener('change', () => {
+                if (selectWorkType.value === 'series') {
+                    seriesInputContainer.classList.remove('hidden');
+                } else {
+                    seriesInputContainer.classList.add('hidden');
+                    document.getElementById('inputSeries').value = '';
+                }
+            });
+
+            function addQuoteInputRow(textValue = '') {
+                const count = quotesListInputsContainer.children.length + 1;
+                const row = document.createElement('div');
+                row.className = "flex items-start gap-2 quote-input-row";
+                row.innerHTML = `
+                    <span class="text-[10px] text-amber-400 font-bold font-mono-num shrink-0 mt-2">#${count}</span>
+                    <textarea rows="1" placeholder="Escribe tu cita aquí..." class="quote-text-field flex-1 bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 font-mono-num">${textValue}</textarea>
+                    <button type="button" class="btn-remove-quote p-1.5 rounded-lg bg-slate-900 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition cursor-pointer font-bold text-xs shrink-0 mt-1" title="Eliminar Cita">✕</button>
+                `;
+
+                row.querySelector('.btn-remove-quote').addEventListener('click', () => {
+                    row.remove();
+                    reindexQuoteRows();
+                });
+
+                quotesListInputsContainer.appendChild(row);
+            }
+
+            function reindexQuoteRows() {
+                const rows = quotesListInputsContainer.querySelectorAll('.quote-input-row');
+                rows.forEach((row, idx) => {
+                    const badge = row.querySelector('span');
+                    if (badge) badge.textContent = `#${idx + 1}`;
+                });
+            }
+
+            btnAddQuoteRow.addEventListener('click', () => addQuoteInputRow(''));
+
+            function getQuotesFromForm() {
+                const quotes = [];
+                quotesListInputsContainer.querySelectorAll('.quote-text-field').forEach(txt => {
+                    const val = txt.value.trim();
+                    if (val) quotes.push(val);
+                });
+                return quotes;
+            }
+
+            function setQuotesToForm(quotesList) {
+                quotesListInputsContainer.innerHTML = '';
+                if (Array.isArray(quotesList) && quotesList.length > 0) {
+                    quotesList.forEach(q => addQuoteInputRow(q));
+                } else if (typeof quotesList === 'string' && quotesList.trim() !== '') {
+                    quotesList.split('\n').forEach(q => {
+                        if (q.trim()) addQuoteInputRow(q.trim());
+                    });
+                } else {
+                    addQuoteInputRow('');
+                }
+            }
+
+            function updateModalProgressDisplay() {
+                const status = selectStatus.value;
+                const tot = parseInt(inputPages.value) || 0;
+
+                if (status === 'read') {
+                    currentPageWrapper.classList.add('hidden');
+                    if (tot > 0) inputCurrentPage.value = tot;
+                } else {
+                    currentPageWrapper.classList.remove('hidden');
+                }
+
+                const cur = parseInt(inputCurrentPage.value) || 0;
+                const pct = calcProgressPct(cur, tot);
+                dispProgressPct.textContent = `${pct}% AVANCE`;
+            }
+
+            inputCurrentPage.addEventListener('input', () => {
+                const cur = parseInt(inputCurrentPage.value) || 0;
+                const tot = parseInt(inputPages.value) || 0;
+                if (tot > 0 && cur >= tot) {
+                    selectStatus.value = 'read';
+                }
+                updateModalProgressDisplay();
+            });
+
+            inputPages.addEventListener('input', () => {
+                updateModalProgressDisplay();
+            });
+
+            selectStatus.addEventListener('change', () => {
+                const st = selectStatus.value;
+                const tot = parseInt(inputPages.value) || 0;
+
+                if (st === 'read') {
+                    if (tot > 0) inputCurrentPage.value = tot;
+                    const endInp = document.getElementById('inputEndDate');
+                    if (!endInp.value) endInp.value = getTodayStr();
+                } else if (st === 'want') {
+                    inputCurrentPage.value = 0;
+                }
+                updateModalProgressDisplay();
+            });
+
+            chkApproxYear.addEventListener('change', () => {
+                if (chkApproxYear.checked) {
+                    exactDatesContainer.classList.add('hidden');
+                    approxYearContainer.classList.remove('hidden');
+                } else {
+                    exactDatesContainer.classList.remove('hidden');
+                    approxYearContainer.classList.add('hidden');
+                }
+            });
+
+            function loadData() {
+                try {
+                    const storedBooks = localStorage.getItem(STORAGE_KEY);
+                    books = storedBooks ? JSON.parse(storedBooks) : INITIAL_BOOKS;
+
+                    books.forEach(b => {
+                        if (['paperback', 'hardcover', 'pocket'].includes(b.format) || !b.format) {
+                            b.format = 'physical';
+                        }
+                        if (!b.workType) {
+                            b.workType = (b.series && b.series.trim() !== '') ? 'series' : 'single';
+                        }
+                        if (['bought', 'gift', 'borrowed', 'library'].includes(b.ownership)) {
+                            b.ownership = 'owned';
+                        }
+                        if (!b.quotesList) {
+                            if (b.quotes && typeof b.quotes === 'string') {
+                                b.quotesList = b.quotes.split('\n').map(q => q.trim()).filter(q => q);
+                            } else {
+                                b.quotesList = [];
+                            }
+                        }
+                        if (b.rereadStatus === undefined) {
+                            b.rereadStatus = (b.rereadCount && parseInt(b.rereadCount) > 0) ? 'yes' : 'no';
+                            b.rereadCount = parseInt(b.rereadCount) || 0;
+                        }
+                    });
+
+                    const storedTree = localStorage.getItem(GENRES_STORAGE_KEY);
+                    genresTree = storedTree ? JSON.parse(storedTree) : DEFAULT_GENRES_TREE;
+
+                    const parsedGoal = parseInt(localStorage.getItem(GOAL_STORAGE_KEY));
+                    annualGoal = (!isNaN(parsedGoal) && parsedGoal > 0) ? parsedGoal : 12;
+
+                    const parsedMonthlyGoal = parseInt(localStorage.getItem(MONTHLY_GOAL_STORAGE_KEY));
+                    monthlyGoal = (!isNaN(parsedMonthlyGoal) && parsedMonthlyGoal > 0) ? parsedMonthlyGoal : 2;
+
+                    const storedLog = localStorage.getItem(LOG_STORAGE_KEY);
+                    readingLog = storedLog ? JSON.parse(storedLog) : {};
+
+                    const parsedDailyGoal = parseInt(localStorage.getItem(DAILY_GOAL_KEY));
+                    dailyPageGoal = (!isNaN(parsedDailyGoal) && parsedDailyGoal > 0) ? parsedDailyGoal : 20;
+
+                    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'theme-dark';
+                    selectTheme.value = storedTheme;
+                    document.body.className = `${storedTheme} h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950 overflow-hidden`;
+
+                } catch(e) {
+                    books = INITIAL_BOOKS;
+                    genresTree = DEFAULT_GENRES_TREE;
+                    readingLog = {};
+                }
+            }
+
+            function saveData() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+                    localStorage.setItem(GENRES_STORAGE_KEY, JSON.stringify(genresTree));
+                    localStorage.setItem(GOAL_STORAGE_KEY, annualGoal.toString());
+                    localStorage.setItem(MONTHLY_GOAL_STORAGE_KEY, monthlyGoal.toString());
+                    localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(readingLog));
+                    localStorage.setItem(DAILY_GOAL_KEY, dailyPageGoal.toString());
+                } catch(err) {}
+                updateUI();
+            }
+
+            function calcProgressPct(cur, tot) {
+                if (!tot || tot <= 0) return 0;
+                return Math.min(100, Math.round((cur / tot) * 100));
+            }
+
+            function renderStarsHTML(rating) {
+                let html = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= Math.floor(rating)) html += '<span class="text-amber-400">★</span>';
+                    else html += '<span class="text-slate-700">★</span>';
+                }
+                return html;
+            }
+
+            function updateGenreDropdowns() {
+                selectBookGenre.innerHTML = '';
+                selectGenreFilter.innerHTML = '<option value="all">Todos los Géneros</option>';
+                const selectParentNew = document.getElementById('selectParentGenreForNew');
+                if (selectParentNew) selectParentNew.innerHTML = '';
+
+                Object.keys(genresTree).forEach(g => {
+                    const opt1 = document.createElement('option'); opt1.value = g; opt1.textContent = g;
+                    selectBookGenre.appendChild(opt1);
+
+                    const opt2 = document.createElement('option'); opt2.value = g; opt2.textContent = g;
+                    selectGenreFilter.appendChild(opt2);
+
+                    if (selectParentNew) {
+                        const opt3 = document.createElement('option'); opt3.value = g; opt3.textContent = g;
+                        selectParentNew.appendChild(opt3);
+                    }
+                });
+
+                populateBookSubgenreDropdown();
+                populateFilterSubgenreDropdown();
+                renderGenresTreeUI();
+            }
+
+            function populateBookSubgenreDropdown() {
+                const parent = selectBookGenre.value || Object.keys(genresTree)[0];
+                selectBookSubgenre.innerHTML = '';
+                const sublist = genresTree[parent] || ['General'];
+                sublist.forEach(sub => {
+                    const opt = document.createElement('option');
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    selectBookSubgenre.appendChild(opt);
+                });
+            }
+
+            function populateFilterSubgenreDropdown() {
+                const parent = selectGenreFilter.value;
+                selectSubgenreFilter.innerHTML = '<option value="all">Todos los Subgéneros</option>';
+
+                let subSet = new Set();
+                if (parent === 'all') {
+                    Object.values(genresTree).forEach(arr => arr.forEach(s => subSet.add(s)));
+                } else {
+                    (genresTree[parent] || []).forEach(s => subSet.add(s));
+                }
+
+                subSet.forEach(sub => {
+                    const opt = document.createElement('option');
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    selectSubgenreFilter.appendChild(opt);
+                });
+            }
+
+            function renderGenresTreeUI() {
+                genresTreeContainer.innerHTML = '';
+                Object.entries(genresTree).forEach(([parent, sublist]) => {
+                    const box = document.createElement('div');
+                    box.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2";
+                    
+                    let subTagsHTML = sublist.map(s => `
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-sky-300 border border-sky-500/20 text-[10px]">
+                            <span>${s}</span>
+                            <button data-del-sub="${s}" data-parent="${parent}" type="button" class="btn-del-sub hover:text-rose-400 ml-0.5 cursor-pointer font-bold">✕</button>
+                        </span>
+                    `).join('');
+
+                    if (sublist.length === 0) {
+                        subTagsHTML = '<span class="text-[10px] text-slate-600 italic">Sin subgéneros asignados</span>';
+                    }
+
+                    box.innerHTML = `
+                        <div class="flex items-center justify-between font-bold text-amber-400 text-xs border-b border-slate-900 pb-1">
+                            <span class="flex items-center gap-1.5">
+                                <span>${parent}</span>
+                                <span class="text-[9px] text-slate-500 font-normal">(${sublist.length})</span>
+                            </span>
+                            <button data-del-genre="${parent}" type="button" class="btn-del-genre px-1.5 py-0.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-semibold border border-rose-500/20 cursor-pointer">
+                                Eliminar Género
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            ${subTagsHTML}
+                        </div>
+                    `;
+                    genresTreeContainer.appendChild(box);
+                });
+
+                document.querySelectorAll('.btn-del-sub').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const parent = btn.dataset.parent;
+                        const sub = btn.dataset.delSub;
+                        if (genresTree[parent]) {
+                            genresTree[parent] = genresTree[parent].filter(s => s !== sub);
+                            saveData();
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.btn-del-genre').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const parent = btn.dataset.delGenre;
+                        showCustomConfirm("Eliminar Género", `¿Deseas eliminar "${parent}" y todos sus subgéneros?`, () => {
+                            delete genresTree[parent];
+                            saveData();
+                            showToast(`Género "${parent}" eliminado.`);
+                        });
+                    });
+                });
+            }
+
+            function getReadThisYearList() {
+                const curYear = getCurrentYearStr();
+                return books.filter(b => b.status === 'read' && !b.isApproxYear && b.endDate && b.endDate.startsWith(curYear));
+            }
+
+            function getReadThisMonthList() {
+                const curYM = getCurrentYearMonthStr();
+                return books.filter(b => b.status === 'read' && !b.isApproxYear && b.endDate && b.endDate.startsWith(curYM));
+            }
+
+            function updateDailyGoalStatusDisplay() {
+                const todayStr = getTodayStr();
+                const todayPages = readingLog[todayStr] || 0;
+                const badge = document.getElementById('dailyGoalStatusBadge');
+                const msg = document.getElementById('dailyGoalStatusMsg');
+
+                if (todayPages >= dailyPageGoal) {
+                    if (badge) {
+                        badge.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                        badge.textContent = "🎉 ¡Meta Superada!";
+                    }
+                    if (msg) {
+                        msg.className = "text-[10px] text-emerald-400 font-mono-num font-semibold";
+                        msg.textContent = `¡Excelente! Llevas ${todayPages} de ${dailyPageGoal} págs planeadas hoy.`;
+                    }
+                } else {
+                    const remaining = dailyPageGoal - todayPages;
+                    if (badge) {
+                        badge.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                        badge.textContent = "⏳ En progreso";
+                    }
+                    if (msg) {
+                        msg.className = "text-[10px] text-amber-300 font-mono-num";
+                        msg.textContent = `Llevas ${todayPages} / ${dailyPageGoal} págs. Te faltan ${remaining} págs hoy.`;
+                    }
+                }
+            }
+
+            function updateStats() {
+                const total = books.length;
+                const readList = books.filter(b => b.status === 'read');
+                const readingList = books.filter(b => b.status === 'reading');
+                const wantList = books.filter(b => b.status === 'want');
+                const oldiesList = books.filter(b => b.isApproxYear);
+                const favList = books.filter(b => b.favorite);
+
+                const readThisYear = getReadThisYearList();
+                const readThisMonth = getReadThisMonthList();
+
+                document.getElementById('badgeTotalBooks').textContent = `${total} Libros`;
+                document.getElementById('statReadYearCount').textContent = readThisYear.length;
+                document.getElementById('statReadMonthCount').textContent = readThisMonth.length;
+                document.getElementById('statReadingCount').textContent = readingList.length;
+
+                const todayPages = readingLog[getTodayStr()] || 0;
+                document.getElementById('statTodayPages').textContent = `${todayPages} págs`;
+                document.getElementById('statDailyGoalSub').textContent = `Meta: ${dailyPageGoal} págs/día`;
+
+                const streak = calculateStreak();
+                document.getElementById('headerStreakCount').textContent = `${streak} días`;
+
+                const pendingReadingPages = books.filter(b => b.status === 'reading').reduce((sum, b) => {
+                    const tot = parseInt(b.pages) || 0;
+                    const cur = parseInt(b.currentPage) || 0;
+                    return sum + Math.max(0, tot - cur);
+                }, 0);
+                document.getElementById('statPendingPages').textContent = `${pendingReadingPages.toLocaleString('es-AR')} págs`;
+
+                const totalPages = books.reduce((a, b) => a + (parseInt(b.pages) || 0), 0);
+                document.getElementById('statTotalPages').textContent = totalPages.toLocaleString('es-AR');
+
+                document.getElementById('cntAll').textContent = total;
+                document.getElementById('cntReading').textContent = readingList.length;
+                document.getElementById('cntRead').textContent = readList.length;
+                document.getElementById('cntWant').textContent = wantList.length;
+                document.getElementById('cntOldies').textContent = oldiesList.length;
+                document.getElementById('cntFav').textContent = favList.length;
+
+                const pctGoal = Math.min(100, Math.round((readThisYear.length / annualGoal) * 100));
+                document.getElementById('headerGoalPct').textContent = `${pctGoal}% (${readThisYear.length}/${annualGoal})`;
+                document.getElementById('statGoalSub').textContent = `Meta Anual: ${annualGoal} libros`;
+                document.getElementById('statMonthlyGoalSub').textContent = `Meta Mensual: ${monthlyGoal} libros`;
+
+                updateDailyGoalStatusDisplay();
+            }
+
+            function updateGoalModalUI() {
+                const readThisYear = getReadThisYearList().length;
+                const readThisMonth = getReadThisMonthList().length;
+
+                const pctAnnual = Math.min(100, Math.round((readThisYear / annualGoal) * 100));
+                const pctMonthly = Math.min(100, Math.round((readThisMonth / monthlyGoal) * 100));
+
+                inputAnnualGoal.value = annualGoal;
+                inputMonthlyGoal.value = monthlyGoal;
+
+                document.getElementById('goalAnnualModalStats').textContent = `${readThisYear} / ${annualGoal} libros (${pctAnnual}%)`;
+                document.getElementById('goalAnnualModalBar').style.width = `${pctAnnual}%`;
+
+                document.getElementById('goalMonthlyModalStats').textContent = `${readThisMonth} / ${monthlyGoal} libros (${pctMonthly}%)`;
+                document.getElementById('goalMonthlyModalBar').style.width = `${pctMonthly}%`;
+            }
+
+            function renderCalendarUI() {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = today.getMonth();
+                
+                const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                document.getElementById('calendarMonthYear').textContent = `${monthNames[month]} ${year}`;
+                
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                const grid = document.getElementById('calendarGrid');
+                grid.innerHTML = '';
+                
+                const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                daysOfWeek.forEach(d => {
+                    const th = document.createElement('div');
+                    th.className = "text-center text-[10px] font-bold text-slate-500 py-1";
+                    th.textContent = d;
+                    grid.appendChild(th);
+                });
+                
+                for (let i = 0; i < firstDay; i++) {
+                    grid.appendChild(document.createElement('div'));
+                }
+                
+                const todayStr = getTodayStr();
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const mm = String(month + 1).padStart(2, '0');
+                    const dd = String(day).padStart(2, '0');
+                    const dateStr = `${year}-${mm}-${dd}`;
+                    const pages = readingLog[dateStr] || 0;
+                    
+                    const cell = document.createElement('div');
+                    cell.className = "p-1 rounded-xl border text-center text-xs flex flex-col items-center justify-between min-h-[44px]";
+                    
+                    if (dateStr === todayStr) {
+                        cell.classList.add('border-amber-500', 'bg-slate-800');
+                    } else {
+                        cell.classList.add('border-slate-800/80', 'bg-slate-950/60');
+                    }
+                    
+                    let badgeClass = "bg-slate-800 text-slate-500";
+                    if (pages >= dailyPageGoal) {
+                        badgeClass = "bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30";
+                    } else if (pages > 0) {
+                        badgeClass = "bg-sky-500/20 text-sky-400 font-medium border border-sky-500/30";
+                    }
+                    
+                    cell.innerHTML = `
+                        <span class="text-[10px] font-bold ${dateStr === todayStr ? 'text-amber-400' : 'text-slate-400'}">${day}</span>
+                        <span class="text-[9px] px-1 py-0.2 rounded ${badgeClass}">${pages > 0 ? pages + 'p' : '-'}</span>
+                    `;
+                    grid.appendChild(cell);
+                }
+
+                document.getElementById('streakModalCount').textContent = `${calculateStreak()} Días`;
+                document.getElementById('todayPagesModal').textContent = `${readingLog[todayStr] || 0} Págs`;
+                document.getElementById('streakGoalTargetSub').textContent = `Meta: ${dailyPageGoal} págs/día`;
+                inputDailyPageGoal.value = dailyPageGoal;
+                inputExactTodayPages.value = readingLog[todayStr] || 0;
+
+                // Cargar desplegable de libros activos para diario
+                selectBookForLog.innerHTML = '<option value="">-- Seleccionar libro (opcional) --</option>';
+                books.filter(b => b.status === 'reading').forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b.id;
+                    opt.textContent = `${b.title} (${b.currentPage}/${b.pages} p)`;
+                    selectBookForLog.appendChild(opt);
+                });
+
+                updateDailyGoalStatusDisplay();
+            }
+
+            function getFilteredBooks() {
+                let list = [...books];
+
+                if (currentFilter === 'reading') list = list.filter(b => b.status === 'reading');
+                else if (currentFilter === 'read') list = list.filter(b => b.status === 'read');
+                else if (currentFilter === 'want') list = list.filter(b => b.status === 'want');
+                else if (currentFilter === 'oldies') list = list.filter(b => b.isApproxYear);
+                else if (currentFilter === 'favorites') list = list.filter(b => b.favorite);
+
+                if (currentGenreFilter !== 'all') list = list.filter(b => b.genre === currentGenreFilter);
+                if (currentSubgenreFilter !== 'all') list = list.filter(b => b.subgenre === currentSubgenreFilter);
+
+                if (currentFormatFilter === 'ebook') list = list.filter(b => b.format === 'ebook');
+                else if (currentFormatFilter === 'physical') list = list.filter(b => b.format === 'physical' || !b.format);
+
+                if (currentSearch.trim() !== '') {
+                    const q = currentSearch.toLowerCase();
+                    list = list.filter(b =>
+                        (b.title && b.title.toLowerCase().includes(q)) ||
+                        (b.author && b.author.toLowerCase().includes(q))
+                    );
+                }
+
+                if (currentSort === 'recent') list.reverse();
+                else if (currentSort === 'author') list.sort((a, b) => (a.author || '').localeCompare(b.author || ''));
+                else if (currentSort === 'title') list.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+                else if (currentSort === 'rating_desc') list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                else if (currentSort === 'progress_desc') list.sort((a, b) => calcProgressPct(b.currentPage, b.pages) - calcProgressPct(a.currentPage, a.pages));
+                else if (currentSort === 'pages_desc') list.sort((a, b) => (b.pages || 0) - (a.pages || 0));
+
+                return list;
+            }
+
+            // REDISEÑO TOTAL DE TARJETA: SI ESTÁ LEÍDO SE OCULTA LA BARRA Y LAS CIFRAS TOSCAS
+            function renderBookCardHTML(book) {
+                const isCompleted = book.status === 'read' || (book.pages > 0 && book.currentPage >= book.pages);
+                const pct = calcProgressPct(book.currentPage, book.pages);
+
+                let statusBadge = '';
+                if (isCompleted) {
+                    statusBadge = '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold flex items-center gap-1">✨ Completado</span>';
+                } else if (book.status === 'reading') {
+                    statusBadge = '<span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10px] font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Leyendo</span>';
+                } else {
+                    statusBadge = '<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-bold">Pendiente</span>';
+                }
+
+                if (book.isApproxYear) {
+                    statusBadge = `<span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold">📜 ${book.approxYear || 'Infancia'}</span>`;
+                }
+
+                const defaultCover = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=400&q=80';
+
+                // SECCIÓN DE PROGRESO O BANNER LIMPIO DE COMPLETADO
+                let progressSectionHTML = '';
+                if (isCompleted) {
+                    const dateStr = book.endDate ? ` • ${book.endDate}` : '';
+                    progressSectionHTML = `
+                        <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-2.5 text-center my-1 space-y-0.5">
+                            <div class="text-xs font-extrabold text-emerald-400 flex items-center justify-center gap-1.5">
+                                <span>✨ Lectura Completada</span>
+                            </div>
+                            <div class="text-[10px] text-emerald-300/80 font-mono-num font-medium">
+                                ${book.pages || 0} páginas leídas${dateStr}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    progressSectionHTML = `
+                        <div class="space-y-1.5 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80">
+                            <div class="flex items-center justify-between text-[10px] font-mono-num">
+                                <span class="text-slate-400">${book.currentPage || 0} / ${book.pages || 0} págs</span>
+                                <span class="text-emerald-400 font-bold">${pct}%</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                                <div class="h-full bg-gradient-to-r from-sky-500 to-emerald-500 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                            </div>
+                            <div class="flex items-center justify-between pt-1">
+                                <span class="text-[9px] text-slate-500 font-mono-num font-medium">Ajustar páginas:</span>
+                                <button data-adjust-page="${book.id}" type="button" class="btn-adjust-pages px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[10px] font-bold font-mono-num transition cursor-pointer flex items-center gap-1">
+                                    <span>⚡ + / - Págs</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // PIE DE TARJETA: SIN EL BOTÓN PELIGROSO '✕'
+                return `
+                    <div class="card-bg rounded-2xl border border-slate-800 shadow-md hover:border-slate-700 transition flex flex-col overflow-hidden group glow-card">
+                        <div class="relative h-44 bg-slate-950 overflow-hidden flex items-center justify-center">
+                            <img src="${book.cover || defaultCover}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-85" onerror="this.src='${defaultCover}'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent"></div>
+                            
+                            <div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                                ${statusBadge}
+                                <div class="flex items-center gap-1">
+                                    <span class="px-2 py-0.5 rounded bg-slate-950/90 text-sky-300 font-mono-num text-[9px] border border-slate-800/80">${book.subgenre || book.genre || 'General'}</span>
+                                    ${getFormatBadgeHTML(book.format)}
+                                </div>
+                            </div>
+
+                            <button data-fav="${book.id}" type="button" class="btn-fav absolute top-2 right-2 p-1.5 rounded-xl bg-slate-950/90 text-amber-400 hover:scale-110 transition border border-slate-800 cursor-pointer shadow">
+                                ${book.favorite ? '★' : '☆'}
+                            </button>
+                        </div>
+
+                        <div class="p-3.5 flex-1 flex flex-col justify-between space-y-2">
+                            <div>
+                                <h3 class="text-sm font-bold text-white line-clamp-1 group-hover:text-amber-400 transition" title="${book.title}">${book.title}</h3>
+                                <p class="text-xs text-amber-300/90 font-medium line-clamp-1">${book.author}</p>
+                                ${book.workType === 'series' && book.series ? `<span class="inline-block mt-0.5 text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono-num">${book.series}</span>` : ''}
+                            </div>
+
+                            ${progressSectionHTML}
+
+                            <div class="flex items-center justify-between text-xs font-mono-num border-t border-slate-800/80 pt-2">
+                                <span class="text-amber-400">${renderStarsHTML(book.rating)}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button data-detail="${book.id}" type="button" class="btn-detail px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-semibold transition cursor-pointer">Ficha</button>
+                                    <button data-edit="${book.id}" type="button" class="btn-edit px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-semibold transition cursor-pointer">Editar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function openPageAdjustModal(bookId) {
+                const b = books.find(x => x.id === bookId);
+                if (!b) return;
+                activeAdjustBookId = bookId;
+
+                document.getElementById('adjustBookTitle').textContent = `⚡ Páginas: "${b.title}"`;
+                const pct = calcProgressPct(b.currentPage, b.pages);
+                document.getElementById('adjustCurrentDisplay').textContent = `${b.currentPage || 0} / ${b.pages || 0} págs (${pct}%)`;
+
+                inputAdjustValue.value = '';
+                inputExactPageValue.value = b.currentPage || 0;
+
+                showModal(modalPageAdjust);
+            }
+
+            btnDoAddPages.addEventListener('click', () => {
+                const b = books.find(x => x.id === activeAdjustBookId);
+                const addVal = parseInt(inputAdjustValue.value);
+                if (b && !isNaN(addVal) && addVal > 0) {
+                    const prevPage = b.currentPage || 0;
+                    b.currentPage = Math.min(b.pages || 0, prevPage + addVal);
+                    const delta = b.currentPage - prevPage;
+                    if (delta > 0) logPagesRead(delta);
+
+                    if (b.currentPage >= b.pages && b.pages > 0) {
+                        b.status = 'read';
+                        if (!b.endDate && !b.isApproxYear) b.endDate = getTodayStr();
+                        showToast(`🎉 ¡"${b.title}" completado!`);
+                    } else {
+                        showToast(`+${delta} páginas sumadas.`);
+                    }
+                    saveData();
+                    hideModal(modalPageAdjust);
+                }
+            });
+
+            btnDoSubPages.addEventListener('click', () => {
+                const b = books.find(x => x.id === activeAdjustBookId);
+                const subVal = parseInt(inputAdjustValue.value);
+                if (b && !isNaN(subVal) && subVal > 0) {
+                    b.currentPage = Math.max(0, (b.currentPage || 0) - subVal);
+                    if (b.currentPage < b.pages && b.status === 'read') {
+                        b.status = 'reading';
+                    }
+                    saveData();
+                    hideModal(modalPageAdjust);
+                    showToast(`-${subVal} páginas restadas.`);
+                }
+            });
+
+            btnSetExactPage.addEventListener('click', () => {
+                const b = books.find(x => x.id === activeAdjustBookId);
+                const exactVal = parseInt(inputExactPageValue.value);
+                if (b && !isNaN(exactVal) && exactVal >= 0) {
+                    b.currentPage = Math.min(b.pages || 0, exactVal);
+                    if (b.currentPage >= b.pages && b.pages > 0) {
+                        b.status = 'read';
+                        if (!b.endDate && !b.isApproxYear) b.endDate = getTodayStr();
+                    } else if (b.currentPage < b.pages && b.status === 'read') {
+                        b.status = 'reading';
+                    }
+                    saveData();
+                    hideModal(modalPageAdjust);
+                    showToast(`Página fijada a ${b.currentPage}.`);
+                }
+            });
+
+            btnCloseAdjust.addEventListener('click', () => hideModal(modalPageAdjust));
+
+            function attachCardEventListeners() {
+                document.querySelectorAll('.btn-fav').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const b = books.find(x => x.id === btn.dataset.fav);
+                        if (b) { b.favorite = !b.favorite; saveData(); }
+                    });
+                });
+
+                document.querySelectorAll('.btn-adjust-pages').forEach(btn => {
+                    btn.addEventListener('click', () => openPageAdjustModal(btn.dataset.adjustPage));
+                });
+
+                document.querySelectorAll('.btn-detail').forEach(btn => {
+                    btn.addEventListener('click', () => openDetailModal(btn.dataset.detail));
+                });
+
+                document.querySelectorAll('.btn-edit').forEach(btn => {
+                    btn.addEventListener('click', () => openBookModal(btn.dataset.edit));
+                });
+            }
+
+            function renderBooks() {
+                const list = getFilteredBooks();
+                booksContainer.innerHTML = '';
+
+                if (list.length === 0) {
+                    booksContainer.innerHTML = `
+                        <div class="flex flex-col items-center justify-center p-12 text-center bg-slate-900/40 rounded-2xl border border-slate-800/80 my-4">
+                            <span class="text-4xl mb-3">📖</span>
+                            <h4 class="text-sm font-bold text-slate-300">No hay libros con los filtros seleccionados</h4>
+                            <p class="text-xs text-slate-500 mt-1">Añade un libro nuevo o limpia la búsqueda.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (currentViewMode === 'author_group') {
+                    const grouped = {};
+                    list.forEach(b => {
+                        const author = b.author || 'Autor Desconocido';
+                        if (!grouped[author]) grouped[author] = [];
+                        grouped[author].push(b);
+                    });
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = "space-y-6";
+
+                    Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0])).forEach(([author, authorBooks]) => {
+                        const section = document.createElement('div');
+                        section.className = "bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-md space-y-3";
+                        
+                        section.innerHTML = `
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                                <h3 class="font-bold text-amber-400 text-sm flex items-center gap-2">
+                                    <span>👤 ${author}</span>
+                                    <span class="text-xs text-slate-500 font-normal">(${authorBooks.length} libro${authorBooks.length > 1 ? 's' : ''})</span>
+                                </h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                ${authorBooks.map(b => renderBookCardHTML(b)).join('')}
+                            </div>
+                        `;
+                        wrapper.appendChild(section);
+                    });
+
+                    booksContainer.appendChild(wrapper);
+                    attachCardEventListeners();
+
+                } else if (currentViewMode === 'grid') {
+                    const grid = document.createElement('div');
+                    grid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3";
+                    grid.innerHTML = list.map(b => renderBookCardHTML(b)).join('');
+                    booksContainer.appendChild(grid);
+                    attachCardEventListeners();
+
+                } else {
+                    const tableWrapper = document.createElement('div');
+                    tableWrapper.className = "bg-slate-900/90 rounded-2xl border border-slate-800 overflow-x-auto shadow-md";
+                    
+                    let tableHTML = `
+                        <table class="w-full text-left text-xs font-mono-num">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-[10px] text-slate-400 uppercase">
+                                    <th class="p-3">Título & Autor</th>
+                                    <th class="p-3">Género / Formato</th>
+                                    <th class="p-3">Estado & Progreso</th>
+                                    <th class="p-3">Rating</th>
+                                    <th class="p-3 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/60">
+                    `;
+
+                    list.forEach(book => {
+                        const pct = calcProgressPct(book.currentPage, book.pages);
+                        tableHTML += `
+                            <tr class="hover:bg-slate-800/40 transition">
+                                <td class="p-3">
+                                    <div class="font-bold text-white">${book.title} ${book.favorite ? '★' : ''}</div>
+                                    <div class="text-[10px] text-amber-300">${book.author} ${book.workType === 'series' && book.series ? `(${book.series})` : ''}</div>
+                                </td>
+                                <td class="p-3">
+                                    <div class="flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded bg-slate-800 text-amber-300 text-[10px]">${book.genre || 'General'}</span>
+                                        ${getFormatBadgeHTML(book.format)}
+                                    </div>
+                                </td>
+                                <td class="p-3">
+                                    <div class="text-[10px] text-emerald-400 font-bold">${pct}% (${book.currentPage || 0}/${book.pages || 0} págs)</div>
+                                </td>
+                                <td class="p-3 text-amber-400 font-bold">${book.rating} ★</td>
+                                <td class="p-3 text-right">
+                                    <button data-detail="${book.id}" type="button" class="btn-detail px-2 py-1 rounded bg-slate-800 text-slate-200 text-[10px] cursor-pointer">Ficha</button>
+                                    <button data-edit="${book.id}" type="button" class="btn-edit px-2 py-1 rounded bg-slate-800 text-amber-400 text-[10px] cursor-pointer">Editar</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += `</tbody></table>`;
+                    tableWrapper.innerHTML = tableHTML;
+                    booksContainer.appendChild(tableWrapper);
+                    attachCardEventListeners();
+                }
+            }
+
+            function updateUI() {
+                updateGenreDropdowns();
+                updateStats();
+                renderBooks();
+            }
+
+            // MOTOR DESCUBRIR CON TIMEOUT DE 3S Y RECOMENDACIONES FALLBACK DE RESPALDO
+            async function openRecommendModal() {
+                showModal(modalRecommend);
+                recommendationsList.innerHTML = `
+                    <div class="col-span-2 text-center py-8 text-slate-400 text-xs flex items-center justify-center gap-2">
+                        <div class="w-4 h-4 rounded-full border-2 border-amber-400 border-t-transparent animate-spin"></div>
+                        <span>Analizando tus lecturas y buscando sugerencias...</span>
+                    </div>
+                `;
+
+                const favBooks = books.filter(b => b.rating >= 4.0 || b.favorite);
+                let queryAuthor = favBooks.length > 0 ? favBooks[0].author : 'Gabriel García Márquez';
+                let queryGenre = favBooks.length > 0 ? (favBooks[0].subgenre || favBooks[0].genre) : 'Ciencia Ficción';
+
+                let loaded = false;
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 segundos exactos
+
+                    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(queryAuthor + ' ' + queryGenre)}&maxResults=4&langRestrict=es`, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    const data = await res.json();
+
+                    if (data.items && data.items.length > 0) {
+                        loaded = true;
+                        recommendationsList.innerHTML = '';
+                        data.items.forEach(item => {
+                            const info = item.volumeInfo;
+                            const cover = info.imageLinks ? info.imageLinks.thumbnail.replace('http:', 'https:') : 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=400&q=80';
+                            
+                            const card = document.createElement('div');
+                            card.className = "bg-slate-950 p-3 rounded-xl border border-purple-500/30 flex gap-3 items-center";
+                            card.innerHTML = `
+                                <img src="${cover}" class="w-12 h-18 object-cover rounded shadow shrink-0">
+                                <div class="min-w-0 flex-1 space-y-1">
+                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">Recomendado</span>
+                                    <h4 class="text-xs font-bold text-white line-clamp-1">${info.title}</h4>
+                                    <p class="text-[10px] text-amber-300 line-clamp-1">${info.authors ? info.authors.join(', ') : 'Autor'}</p>
+                                    <p class="text-[9px] text-slate-500 font-mono-num">${info.pageCount || 300} págs</p>
+                                    <button data-add-rec="${encodeURIComponent(JSON.stringify({title: info.title, author: info.authors ? info.authors[0] : 'Autor', pages: info.pageCount || 300, cover}))}" class="btn-add-rec mt-1 px-2 py-0.5 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[10px] cursor-pointer">
+                                        + Añadir a Pendientes
+                                    </button>
+                                </div>
+                            `;
+                            recommendationsList.appendChild(card);
+                        });
+                    }
+                } catch(err) {}
+
+                if (!loaded) {
+                    // Cargar sugerencias de respaldo en caso de desconexión o fallo
+                    const fallbacks = [
+                        { title: 'Ficciones', author: 'Jorge Luis Borges', pages: 224, genre: 'Cuentos', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80' },
+                        { title: 'El Aleph', author: 'Jorge Luis Borges', pages: 208, genre: 'Cuentos', cover: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=400&q=80' },
+                        { title: 'Ensayo sobre la ceguera', author: 'José Saramago', pages: 328, genre: 'Ficción', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=400&q=80' },
+                        { title: 'El problema de los tres cuerpos', author: 'Cixin Liu', pages: 416, genre: 'Ciencia Ficción', cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80' }
+                    ];
+
+                    recommendationsList.innerHTML = '';
+                    fallbacks.forEach(f => {
+                        const card = document.createElement('div');
+                        card.className = "bg-slate-950 p-3 rounded-xl border border-purple-500/30 flex gap-3 items-center";
+                        card.innerHTML = `
+                            <img src="${f.cover}" class="w-12 h-18 object-cover rounded shadow shrink-0">
+                            <div class="min-w-0 flex-1 space-y-1">
+                                <span class="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">Imperdibles</span>
+                                <h4 class="text-xs font-bold text-white line-clamp-1">${f.title}</h4>
+                                <p class="text-[10px] text-amber-300 line-clamp-1">${f.author}</p>
+                                <p class="text-[9px] text-slate-500 font-mono-num">${f.pages} págs</p>
+                                <button data-add-rec="${encodeURIComponent(JSON.stringify(f))}" class="btn-add-rec mt-1 px-2 py-0.5 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[10px] cursor-pointer">
+                                    + Añadir a Pendientes
+                                </button>
+                            </div>
+                        `;
+                        recommendationsList.appendChild(card);
+                    });
+                }
+
+                document.querySelectorAll('.btn-add-rec').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const recData = JSON.parse(decodeURIComponent(btn.dataset.addRec));
+                        books.push({
+                            id: Date.now().toString(),
+                            title: recData.title,
+                            author: recData.author,
+                            genre: queryGenre,
+                            subgenre: 'Recomendado',
+                            pages: recData.pages,
+                            currentPage: 0,
+                            status: 'want',
+                            rating: 5,
+                            cover: recData.cover,
+                            format: 'physical',
+                            workType: 'single',
+                            ownership: 'owned',
+                            rereadStatus: 'no',
+                            rereadCount: 0,
+                            quotesList: []
+                        });
+                        currentFilter = 'all';
+                        saveData();
+                        hideModal(modalRecommend);
+                        showToast(`"${recData.title}" añadido a Pendientes.`);
+                    });
+                });
+            }
+
+            // AUTOCOMPLETADO API DE BÚSQUEDA CORREGIDO
+            let apiTimeout = null;
+            apiSearchQuery.addEventListener('input', (e) => {
+                clearTimeout(apiTimeout);
+                const q = e.target.value.trim();
+                if (q.length < 3) {
+                    apiSearchResults.classList.add('hidden');
+                    return;
+                }
+
+                apiTimeout = setTimeout(async () => {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+                        const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=5`, { signal: controller.signal });
+                        clearTimeout(timeoutId);
+                        const data = await res.json();
+                        
+                        if (data.items && data.items.length > 0) {
+                            apiSearchResults.innerHTML = '';
+                            apiSearchResults.classList.remove('hidden');
+
+                            data.items.forEach(item => {
+                                const info = item.volumeInfo;
+                                const div = document.createElement('div');
+                                div.className = "p-2 hover:bg-slate-800 cursor-pointer border-b border-slate-800/80 flex items-center gap-2.5 transition";
+                                const imgUrl = info.imageLinks ? info.imageLinks.thumbnail.replace('http:', 'https:') : '';
+                                
+                                div.innerHTML = `
+                                    <img src="${imgUrl || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=400&q=80'}" class="w-8 h-11 object-cover rounded shrink-0">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="font-bold text-white line-clamp-1">${info.title}</div>
+                                        <div class="text-[10px] text-amber-400">${info.authors ? info.authors.join(', ') : 'Autor Desconocido'}</div>
+                                    </div>
+                                `;
+
+                                div.addEventListener('click', () => {
+                                    document.getElementById('inputTitle').value = info.title || '';
+                                    document.getElementById('inputAuthor').value = info.authors ? info.authors.join(', ') : '';
+                                    document.getElementById('inputPublisher').value = info.publisher || '';
+                                    document.getElementById('inputPages').value = info.pageCount || '';
+                                    document.getElementById('inputCover').value = imgUrl;
+
+                                    if (info.industryIdentifiers) {
+                                        const isbnObj = info.industryIdentifiers.find(i => i.type.includes('ISBN'));
+                                        if (isbnObj) document.getElementById('inputISBN').value = isbnObj.identifier;
+                                    }
+
+                                    updateModalProgressDisplay();
+                                    apiSearchResults.classList.add('hidden');
+                                    apiSearchQuery.value = '';
+                                    showToast('✨ Datos cargados desde API');
+                                });
+
+                                apiSearchResults.appendChild(div);
+                            });
+                        }
+                    } catch(err) {
+                        apiSearchResults.classList.add('hidden');
+                    }
+                }, 300);
+            });
+
+            function openBookModal(bookId = null) {
+                formBook.reset();
+                apiSearchResults.classList.add('hidden');
+
+                if (bookId) {
+                    const book = books.find(b => b.id === bookId);
+                    if (book) {
+                        document.getElementById('modalTitle').innerHTML = '<span class="p-1 rounded bg-amber-500/20 text-amber-400">✏️</span> Editar Libro';
+                        document.getElementById('bookId').value = book.id;
+                        document.getElementById('inputTitle').value = book.title || '';
+                        document.getElementById('inputAuthor').value = book.author || '';
+                        selectBookGenre.value = book.genre || Object.keys(genresTree)[0];
+                        populateBookSubgenreDropdown();
+                        selectBookSubgenre.value = book.subgenre || 'General';
+                        document.getElementById('inputPublisher').value = book.publisher || '';
+                        document.getElementById('inputISBN').value = book.isbn || '';
+                        
+                        selectWorkType.value = book.workType || (book.series ? 'series' : 'single');
+                        if (selectWorkType.value === 'series') {
+                            seriesInputContainer.classList.remove('hidden');
+                            document.getElementById('inputSeries').value = book.series || '';
+                        } else {
+                            seriesInputContainer.classList.add('hidden');
+                            document.getElementById('inputSeries').value = '';
+                        }
+
+                        document.getElementById('selectFormat').value = book.format || 'physical';
+                        selectOwnership.value = book.ownership || 'owned';
+
+                        selectStatus.value = book.status || 'reading';
+                        inputCurrentPage.value = book.currentPage || 0;
+                        inputPages.value = book.pages || '';
+
+                        selectIsReread.value = book.rereadStatus || ((book.rereadCount && book.rereadCount > 0) ? 'yes' : 'no');
+                        if (selectIsReread.value === 'yes') {
+                            inputRereadCount.classList.remove('hidden');
+                            inputRereadCount.value = book.rereadCount || 1;
+                        } else {
+                            inputRereadCount.classList.add('hidden');
+                            inputRereadCount.value = 0;
+                        }
+
+                        chkApproxYear.checked = !!book.isApproxYear;
+                        if (book.isApproxYear) {
+                            exactDatesContainer.classList.add('hidden');
+                            approxYearContainer.classList.remove('hidden');
+                            document.getElementById('inputApproxYear').value = book.approxYear || '';
+                        } else {
+                            exactDatesContainer.classList.remove('hidden');
+                            approxYearContainer.classList.add('hidden');
+                            document.getElementById('inputStartDate').value = book.startDate || '';
+                            document.getElementById('inputEndDate').value = book.endDate || '';
+                        }
+
+                        document.getElementById('selectRating').value = book.rating || 5;
+                        document.getElementById('chkFavorite').checked = !!book.favorite;
+                        document.getElementById('inputCover').value = book.cover || '';
+                        document.getElementById('textareaReview').value = book.review || '';
+
+                        setQuotesToForm(book.quotesList || []);
+                    }
+                } else {
+                    document.getElementById('modalTitle').innerHTML = '<span class="p-1 rounded bg-amber-500/20 text-amber-400">📖</span> Registrar Nuevo Libro';
+                    document.getElementById('bookId').value = '';
+                    selectWorkType.value = 'single';
+                    seriesInputContainer.classList.add('hidden');
+                    selectIsReread.value = 'no';
+                    inputRereadCount.classList.add('hidden');
+                    inputRereadCount.value = 0;
+                    chkApproxYear.checked = false;
+                    exactDatesContainer.classList.remove('hidden');
+                    approxYearContainer.classList.add('hidden');
+                    
+                    selectBookGenre.value = Object.keys(genresTree)[0] || 'Ciencia Ficción';
+                    populateBookSubgenreDropdown();
+
+                    setQuotesToForm([]);
+                }
+
+                updateModalProgressDisplay();
+                showModal(modalBook);
+            }
+
+            function openDetailModal(bookId) {
+                const book = books.find(b => b.id === bookId);
+                if (!book) return;
+                activeDetailBookId = bookId;
+
+                document.getElementById('detailTitle').textContent = book.title;
+                document.getElementById('detailAuthor').textContent = `Por ${book.author}`;
+                document.getElementById('detailGenreTag').textContent = book.genre || 'General';
+                document.getElementById('detailSubgenreTag').textContent = book.subgenre || '-';
+                document.getElementById('detailFormatTag').textContent = book.format === 'ebook' ? '📱 eBook' : '📖 Físico';
+
+                const seriesTag = document.getElementById('detailSeriesTag');
+                if (book.workType === 'series' && book.series) {
+                    seriesTag.textContent = book.series;
+                    seriesTag.classList.remove('hidden');
+                } else {
+                    seriesTag.classList.add('hidden');
+                }
+
+                const coverImg = document.getElementById('detailCover');
+                coverImg.src = book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=400&q=80';
+
+                const pct = calcProgressPct(book.currentPage, book.pages);
+                document.getElementById('detailRating').textContent = `${book.rating} ★`;
+                document.getElementById('detailProgress').textContent = `${book.currentPage || 0} / ${book.pages || 0} págs (${pct}%)`;
+                document.getElementById('detailEditorial').textContent = `${book.publisher || 'N/A'} • ISBN: ${book.isbn || 'N/A'}`;
+                
+                const datesElem = document.getElementById('detailDates');
+                const ownLabel = book.ownership === 'wishlist' ? 'Por comprar' : 'En posesión';
+                
+                let timeText = '';
+                if (book.isApproxYear) {
+                    timeText = `📜 Año: ${book.approxYear || 'Antiguo'}`;
+                } else if (book.startDate && book.endDate) {
+                    const start = new Date(book.startDate);
+                    const end = new Date(book.endDate);
+                    const diffTime = Math.abs(end - start);
+                    const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+                    const speed = Math.round((book.pages || 0) / diffDays);
+                    timeText = `${book.startDate} al ${book.endDate} (${diffDays} días, ~${speed} p/d)`;
+                } else {
+                    timeText = `${book.startDate || 'S/F'} al ${book.endDate || 'S/F'}`;
+                }
+
+                datesElem.innerHTML = `${timeText}<br><span class="text-amber-400 font-bold">${ownLabel}</span> ${book.rereadStatus === 'yes' ? `• Releído ${book.rereadCount || 1}x` : ''}`;
+
+                document.getElementById('detailReview').textContent = book.review ? `"${book.review}"` : 'Sin crítica escrita.';
+
+                const quotesCont = document.getElementById('detailQuotes');
+                quotesCont.innerHTML = '';
+                const qList = book.quotesList || [];
+                if (qList.length > 0) {
+                    qList.forEach(q => {
+                        const b = document.createElement('blockquote');
+                        b.className = "bg-slate-950 p-2.5 rounded-xl border-l-2 border-amber-400 text-xs text-amber-200/90 italic font-mono-num flex items-center justify-between gap-2";
+                        b.innerHTML = `
+                            <span>"${q}"</span>
+                            <button class="btn-copy-quote px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[9px] font-bold shrink-0 cursor-pointer">Copiar 📋</button>
+                        `;
+                        b.querySelector('.btn-copy-quote').addEventListener('click', () => {
+                            navigator.clipboard.writeText(q);
+                            showToast('Cita copiada al portapapeles.');
+                        });
+                        quotesCont.appendChild(b);
+                    });
+                } else {
+                    quotesCont.innerHTML = '<p class="text-xs text-slate-600 italic">Sin citas guardadas.</p>';
+                }
+
+                showModal(modalDetail);
+            }
+
+            btnDeleteFromDetail.addEventListener('click', () => {
+                if (!activeDetailBookId) return;
+                const book = books.find(b => b.id === activeDetailBookId);
+                const title = book ? book.title : 'este libro';
+                
+                showCustomConfirm("Eliminar Libro", `¿Estás seguro de borrar "${title}"? Esta acción no se puede deshacer.`, () => {
+                    books = books.filter(b => b.id !== activeDetailBookId);
+                    saveData();
+                    hideModal(modalDetail);
+                    showToast('🗑️ Libro eliminado correctamente.');
+                });
+            });
+
+            function renderQuotesBankUI() {
+                selectQuotesGenreFilter.innerHTML = '<option value="all">Todos los Géneros</option>';
+                
+                Object.keys(genresTree).forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g;
+                    opt.textContent = g;
+                    selectQuotesGenreFilter.appendChild(opt);
+                });
+
+                let filteredBooks = [...books].filter(b => b.quotesList && b.quotesList.length > 0);
+
+                const genreFilter = selectQuotesGenreFilter.value;
+                if (genreFilter !== 'all') {
+                    filteredBooks = filteredBooks.filter(b => b.genre === genreFilter);
+                }
+
+                const sortMode = selectQuotesSort.value;
+                if (sortMode === 'recent') filteredBooks.reverse();
+                else if (sortMode === 'author') filteredBooks.sort((a, b) => (a.author || '').localeCompare(b.author || ''));
+                else if (sortMode === 'title') filteredBooks.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+
+                const query = inputQuotesSearch.value.trim().toLowerCase();
+
+                quotesBankContainer.innerHTML = '';
+                let totalQuotesRendered = 0;
+
+                filteredBooks.forEach(b => {
+                    let matchingQuotes = b.quotesList || [];
+                    if (query !== '') {
+                        matchingQuotes = matchingQuotes.filter(q => 
+                            q.toLowerCase().includes(query) || 
+                            (b.title && b.title.toLowerCase().includes(query)) || 
+                            (b.author && b.author.toLowerCase().includes(query))
+                        );
+                    }
+
+                    if (matchingQuotes.length > 0) {
+                        totalQuotesRendered += matchingQuotes.length;
+                        const card = document.createElement('div');
+                        card.className = "bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2.5";
+                        
+                        let quotesHTML = matchingQuotes.map(q => `
+                            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80 flex items-start justify-between gap-2">
+                                <p class="text-xs text-amber-200 italic font-mono-num leading-relaxed flex-1">"${q}"</p>
+                                <button data-copy="${encodeURIComponent(q)}" class="btn-copy-quote px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold shrink-0 cursor-pointer">Copiar 📋</button>
+                            </div>
+                        `).join('');
+
+                        card.innerHTML = `
+                            <div class="flex items-center justify-between border-b border-slate-900 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-white">${b.title}</span>
+                                    <span class="text-[10px] text-amber-400 font-medium">— ${b.author}</span>
+                                </div>
+                                <span class="text-[9px] px-2 py-0.5 rounded bg-slate-900 text-slate-400 font-mono-num border border-slate-800">${matchingQuotes.length} cita${matchingQuotes.length > 1 ? 's' : ''}</span>
+                            </div>
+                            <div class="space-y-1.5">${quotesHTML}</div>
+                        `;
+                        quotesBankContainer.appendChild(card);
+                    }
+                });
+
+                if (totalQuotesRendered === 0) {
+                    quotesBankContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-8">No se encontraron citas con los criterios seleccionados.</p>';
+                }
+
+                quotesBankContainer.querySelectorAll('.btn-copy-quote').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const qText = decodeURIComponent(btn.dataset.copy);
+                        navigator.clipboard.writeText(qText);
+                        showToast('Cita copiada al portapapeles.');
+                    });
+                });
+            }
+
+            function openQuotesModal() {
+                renderQuotesBankUI();
+                showModal(modalQuotes);
+            }
+
+            inputQuotesSearch.addEventListener('input', renderQuotesBankUI);
+            selectQuotesGenreFilter.addEventListener('change', renderQuotesBankUI);
+            selectQuotesSort.addEventListener('change', renderQuotesBankUI);
+
+            function openStatsModal() {
+                showModal(modalStats);
+
+                const loggedDays = Object.values(readingLog).filter(p => p > 0);
+                const totalLoggedPages = loggedDays.reduce((a, b) => a + b, 0);
+                const avgSpeed = loggedDays.length > 0 ? Math.round(totalLoggedPages / loggedDays.length) : 0;
+                
+                document.getElementById('kpiReadingSpeed').textContent = `${avgSpeed} p/día`;
+
+                const readBooks = books.filter(b => b.pages > 0);
+                let longestBook = { pages: 0, title: '-' };
+                if (readBooks.length > 0) {
+                    const sortedByPages = [...readBooks].sort((a, b) => b.pages - a.pages);
+                    longestBook = sortedByPages[0];
+                }
+
+                document.getElementById('kpiLongestBook').textContent = `${longestBook.pages.toLocaleString('es-AR')} págs`;
+                document.getElementById('kpiLongestBookTitle').textContent = longestBook.title;
+
+                const totalRereadCount = books.reduce((sum, b) => sum + (parseInt(b.rereadCount) || 0), 0);
+                document.getElementById('kpiTotalRereads').textContent = `${totalRereadCount} veces`;
+
+                const totalQuotesCount = books.reduce((sum, b) => sum + ((b.quotesList && b.quotesList.length) || 0), 0);
+                document.getElementById('kpiTotalQuotes').textContent = `${totalQuotesCount} citas`;
+
+                const genreCounts = {};
+                books.forEach(b => {
+                    const g = b.genre || 'General';
+                    genreCounts[g] = (genreCounts[g] || 0) + 1;
+                });
+
+                try {
+                    const ctxGenre = document.getElementById('chartGenres').getContext('2d');
+                    if (chartGenresInstance) chartGenresInstance.destroy();
+                    chartGenresInstance = new Chart(ctxGenre, {
+                        type: 'doughnut',
+                        data: {
+                            labels: Object.keys(genreCounts),
+                            datasets: [{
+                                data: Object.values(genreCounts),
+                                backgroundColor: ['#f59e0b', '#38bdf8', '#10b981', '#a855f7', '#ec4899', '#6366f1', '#14b8a6', '#f97316'],
+                                borderWidth: 2,
+                                borderColor: '#070b13'
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 10 } } } } }
+                    });
+
+                    const read = books.filter(b => b.status === 'read').length;
+                    const reading = books.filter(b => b.status === 'reading').length;
+                    const want = books.filter(b => b.status === 'want').length;
+
+                    const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+                    if (chartStatusInstance) chartStatusInstance.destroy();
+                    chartStatusInstance = new Chart(ctxStatus, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Leídos', 'Leyendo', 'Pendientes'],
+                            datasets: [{
+                                label: 'Cantidad de Libros',
+                                data: [read, reading, want],
+                                backgroundColor: ['#10b981', '#38bdf8', '#f59e0b'],
+                                borderRadius: 8
+                            }]
+                        },
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false, 
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { ticks: { color: '#94a3b8', precision: 0 }, grid: { color: '#1e293b' } },
+                                x: { ticks: { color: '#cbd5e1' }, grid: { display: false } }
+                            }
+                        }
+                    });
+                } catch(e) {}
+            }
+
+            selectBookGenre.addEventListener('change', populateBookSubgenreDropdown);
+            selectGenreFilter.addEventListener('change', () => {
+                currentGenreFilter = selectGenreFilter.value;
+                populateFilterSubgenreDropdown();
+                renderBooks();
+            });
+            selectSubgenreFilter.addEventListener('change', () => {
+                currentSubgenreFilter = selectSubgenreFilter.value;
+                renderBooks();
+            });
+            selectFormatFilter.addEventListener('change', () => {
+                currentFormatFilter = selectFormatFilter.value;
+                renderBooks();
+            });
+
+            btnAddBook.addEventListener('click', () => openBookModal());
+            btnCloseModal.addEventListener('click', () => hideModal(modalBook));
+            btnCancelForm.addEventListener('click', () => hideModal(modalBook));
+
+            btnManageGenres.addEventListener('click', () => {
+                dropdownTools.classList.add('hidden');
+                showModal(modalGenres);
+            });
+            btnCloseGenres.addEventListener('click', () => hideModal(modalGenres));
+
+            btnOpenRecommend.addEventListener('click', openRecommendModal);
+            btnCloseRecommend.addEventListener('click', () => hideModal(modalRecommend));
+
+            btnOpenGoal.addEventListener('click', () => {
+                updateGoalModalUI();
+                showModal(modalGoal);
+            });
+            btnCloseGoal.addEventListener('click', () => hideModal(modalGoal));
+            btnSaveGoal.addEventListener('click', () => {
+                const parsedA = parseInt(inputAnnualGoal.value);
+                const parsedM = parseInt(inputMonthlyGoal.value);
+                annualGoal = (!isNaN(parsedA) && parsedA > 0) ? parsedA : 12;
+                monthlyGoal = (!isNaN(parsedM) && parsedM > 0) ? parsedM : 2;
+                saveData();
+                hideModal(modalGoal);
+                showToast('Metas actualizadas.');
+            });
+
+            btnOpenStreak.addEventListener('click', () => {
+                renderCalendarUI();
+                showModal(modalStreakCalendar);
+            });
+            btnCloseStreak.addEventListener('click', () => hideModal(modalStreakCalendar));
+            
+            btnSaveDailyGoal.addEventListener('click', () => {
+                dailyPageGoal = parseInt(inputDailyPageGoal.value) || 20;
+                saveData();
+                renderCalendarUI();
+                showToast(`Meta diaria: ${dailyPageGoal} págs.`);
+            });
+
+            btnQuickAddTodayPages.addEventListener('click', () => {
+                const addVal = parseInt(inputQuickAddTodayPages.value);
+                const bookId = selectBookForLog.value;
+
+                if (!isNaN(addVal) && addVal > 0) {
+                    logPagesRead(addVal);
+                    
+                    if (bookId) {
+                        const b = books.find(x => x.id === bookId);
+                        if (b) {
+                            b.currentPage = Math.min(b.pages || 0, (b.currentPage || 0) + addVal);
+                            if (b.currentPage >= b.pages && b.pages > 0) {
+                                b.status = 'read';
+                                if (!b.endDate && !b.isApproxYear) b.endDate = getTodayStr();
+                            }
+                        }
+                    }
+
+                    inputQuickAddTodayPages.value = '';
+                    saveData();
+                    renderCalendarUI();
+                    showToast(`+${addVal} páginas sumadas.`);
+                }
+            });
+
+            btnSetExactTodayPages.addEventListener('click', () => {
+                const exactVal = parseInt(inputExactTodayPages.value);
+                if (!isNaN(exactVal) && exactVal >= 0) {
+                    const todayStr = getTodayStr();
+                    readingLog[todayStr] = exactVal;
+                    saveData();
+                    renderCalendarUI();
+                    showToast(`Total de hoy: ${exactVal} págs.`);
+                }
+            });
+
+            btnOpenQuotes.addEventListener('click', () => {
+                dropdownTools.classList.add('hidden');
+                openQuotesModal();
+            });
+            btnCloseQuotes.addEventListener('click', () => hideModal(modalQuotes));
+
+            btnOpenStats.addEventListener('click', () => {
+                dropdownTools.classList.add('hidden');
+                openStatsModal();
+            });
+            btnCloseStats.addEventListener('click', () => hideModal(modalStats));
+
+            btnCloseDetail.addEventListener('click', () => hideModal(modalDetail));
+            btnCloseDetail2.addEventListener('click', () => hideModal(modalDetail));
+            btnEditFromDetail.addEventListener('click', () => {
+                hideModal(modalDetail);
+                if (activeDetailBookId) openBookModal(activeDetailBookId);
+            });
+
+            function executeBookSave() {
+                const titleVal = document.getElementById('inputTitle').value.trim();
+                const authorVal = document.getElementById('inputAuthor').value.trim();
+                const rawPages = parseInt(inputPages.value);
+                const pagesVal = (!isNaN(rawPages) && rawPages > 0) ? rawPages : 100;
+
+                if (!titleVal) {
+                    alert('Por favor, ingresa el título del libro.');
+                    document.getElementById('inputTitle').focus();
+                    return;
+                }
+                if (!authorVal) {
+                    alert('Por favor, ingresa el autor del libro.');
+                    document.getElementById('inputAuthor').focus();
+                    return;
+                }
+
+                const startDateVal = document.getElementById('inputStartDate').value || '';
+                const endDateValRaw = document.getElementById('inputEndDate').value || '';
+                const isApprox = chkApproxYear.checked;
+
+                if (!isApprox && startDateVal && endDateValRaw && endDateValRaw < startDateVal) {
+                    alert('La fecha de término no puede ser anterior a la fecha de inicio.');
+                    return;
+                }
+
+                const id = document.getElementById('bookId').value;
+                const status = selectStatus.value || 'reading';
+
+                let curPage = parseInt(inputCurrentPage.value) || 0;
+                if (status === 'read') {
+                    curPage = pagesVal;
+                }
+
+                let endDateVal = endDateValRaw;
+                if (status === 'read' && !isApprox && !endDateVal) {
+                    endDateVal = getTodayStr();
+                }
+
+                const workTypeVal = selectWorkType.value;
+                const seriesVal = workTypeVal === 'series' ? document.getElementById('inputSeries').value.trim() : '';
+
+                const rereadStatusVal = selectIsReread.value;
+                const rereadCountVal = rereadStatusVal === 'yes' ? (parseInt(inputRereadCount.value) || 1) : 0;
+
+                const bookData = {
+                    id: id || Date.now().toString(),
+                    title: titleVal,
+                    author: authorVal,
+                    genre: selectBookGenre.value || Object.keys(genresTree)[0] || 'General',
+                    subgenre: selectBookSubgenre.value || 'General',
+                    publisher: document.getElementById('inputPublisher').value.trim(),
+                    isbn: document.getElementById('inputISBN').value.trim(),
+                    workType: workTypeVal,
+                    series: seriesVal,
+                    format: document.getElementById('selectFormat').value,
+                    ownership: selectOwnership.value,
+                    status: status,
+                    currentPage: curPage,
+                    pages: pagesVal,
+                    rereadStatus: rereadStatusVal,
+                    rereadCount: rereadCountVal,
+                    isApproxYear: isApprox,
+                    startDate: isApprox ? '' : startDateVal,
+                    endDate: isApprox ? '' : endDateVal,
+                    approxYear: isApprox ? document.getElementById('inputApproxYear').value.trim() : '',
+                    rating: parseFloat(document.getElementById('selectRating').value) || 5,
+                    favorite: document.getElementById('chkFavorite').checked,
+                    cover: document.getElementById('inputCover').value.trim(),
+                    review: document.getElementById('textareaReview').value.trim(),
+                    quotesList: getQuotesFromForm()
+                };
+
+                if (id) {
+                    const idx = books.findIndex(b => b.id === id);
+                    if (idx !== -1) books[idx] = bookData;
+                    else books.push(bookData);
+                } else {
+                    books.push(bookData);
+                }
+
+                currentFilter = 'all';
+                currentGenreFilter = 'all';
+                currentSubgenreFilter = 'all';
+                currentFormatFilter = 'all';
+                currentSearch = '';
+
+                document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+                const tabAll = document.querySelector('.filter-tab[data-filter="all"]');
+                if (tabAll) tabAll.classList.add('active');
+
+                selectGenreFilter.value = 'all';
+                selectSubgenreFilter.value = 'all';
+                selectFormatFilter.value = 'all';
+                inputSearch.value = '';
+
+                saveData();
+                hideModal(modalBook);
+                showToast('✅ ¡Libro guardado con éxito!');
+            }
+
+            formBook.addEventListener('submit', (e) => {
+                e.preventDefault();
+                executeBookSave();
+            });
+
+            document.getElementById('btnSubmitBook').addEventListener('click', (e) => {
+                e.preventDefault();
+                executeBookSave();
+            });
+
+            formNewMainGenre.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('inputNewMainGenreName').value.trim();
+                if (name) {
+                    if (!genresTree[name]) {
+                        genresTree[name] = [];
+                        saveData();
+                        document.getElementById('inputNewMainGenreName').value = '';
+                        showToast(`Género "${name}" creado.`);
+                    } else {
+                        alert('Ese género principal ya existe.');
+                    }
+                }
+            });
+
+            formNewSubgenre.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const parent = document.getElementById('selectParentGenreForNew').value;
+                const name = document.getElementById('inputNewSubgenreName').value.trim();
+                if (parent && name) {
+                    if (!genresTree[parent]) genresTree[parent] = [];
+                    if (!genresTree[parent].includes(name)) {
+                        genresTree[parent].push(name);
+                        saveData();
+                        document.getElementById('inputNewSubgenreName').value = '';
+                        showToast(`Subgénero "${name}" agregado.`);
+                    } else {
+                        alert('Ese subgénero ya existe en este género.');
+                    }
+                }
+            });
+
+            document.querySelectorAll('.filter-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderBooks();
+                });
+            });
+
+            inputSearch.addEventListener('input', (e) => {
+                currentSearch = e.target.value;
+                renderBooks();
+            });
+
+            selectSort.addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                renderBooks();
+            });
+
+            function setViewMode(mode) {
+                currentViewMode = mode;
+                btnViewGrid.classList.remove('active');
+                btnViewTable.classList.remove('active');
+                btnViewAuthor.classList.remove('active');
+
+                if (mode === 'grid') btnViewGrid.classList.add('active');
+                else if (mode === 'table') btnViewTable.classList.add('active');
+                else if (mode === 'author_group') btnViewAuthor.classList.add('active');
+
+                renderBooks();
+            }
+
+            btnViewGrid.addEventListener('click', () => setViewMode('grid'));
+            btnViewTable.addEventListener('click', () => setViewMode('table'));
+            btnViewAuthor.addEventListener('click', () => setViewMode('author_group'));
+
+            btnExportJSON.addEventListener('click', () => {
+                const data = { books, genresTree, annualGoal, monthlyGoal, readingLog, dailyPageGoal };
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+                const anchor = document.createElement('a');
+                anchor.setAttribute("href", dataStr);
+                anchor.setAttribute("download", `backup_libreria_v11_${new Date().toISOString().slice(0,10)}.json`);
+                document.body.appendChild(anchor);
+                anchor.click();
+                anchor.remove();
+                dropdownTools.classList.add('hidden');
+                showToast('💾 Backup descargado.');
+            });
+
+            inputImportJSON.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                showCustomConfirm("Importar Backup", "¿Deseas reemplazar tu biblioteca actual con los datos del archivo cargado?", () => {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        try {
+                            const imported = JSON.parse(evt.target.result);
+                            if (imported.books) books = imported.books;
+                            if (imported.genresTree) genresTree = imported.genresTree;
+                            if (imported.annualGoal) annualGoal = imported.annualGoal;
+                            if (imported.monthlyGoal) monthlyGoal = imported.monthlyGoal;
+                            if (imported.readingLog) readingLog = imported.readingLog;
+                            if (imported.dailyPageGoal) dailyPageGoal = imported.dailyPageGoal;
+                            saveData();
+                            dropdownTools.classList.add('hidden');
+                            showToast('¡Backup restaurado con éxito!');
+                        } catch(err) {
+                            alert('Archivo JSON no válido.');
+                        }
+                    };
+                    reader.readAsText(file);
+                });
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal-backdrop').forEach(el => hideModal(el));
+                    dropdownTools.classList.add('hidden');
+                }
+            });
+
+            document.querySelectorAll('.modal-backdrop').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (e.target === el) hideModal(el);
+                });
+            });
+
+            function init() {
+                loadData();
+                updateUI();
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</body>
+</html>
